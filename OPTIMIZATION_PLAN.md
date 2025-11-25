@@ -31,7 +31,7 @@ This extension started as a fork of the original [obsidian-raycast](https://gith
 
 ## Master Task List
 
-### Phase 0: Project Setup [IN PROGRESS]
+### Phase 0: Project Setup [COMPLETE]
 - [x] Fix critical Windows bugs
 - [x] Implement lazy loading for large vaults
 - [x] Add image attachment rendering
@@ -40,13 +40,16 @@ This extension started as a fork of the original [obsidian-raycast](https://gith
 - [x] Initialize git repository
 - [x] Create comprehensive README with credits
 - [x] Add DEVELOPMENT_STORY.md with full narrative
-- [ ] Create GitHub repository and push
+- [x] Create GitHub repository (private): https://github.com/josh-stephens/obsidian-multivault
 
-### Phase 1: Search Quick Wins
-- [ ] **1.1 Add Search Debouncing** - Debounce search input by 150-200ms
-- [ ] **1.2 Pre-build Fuse Index on Cache Creation** - Store serialized index in cache
-- [ ] **1.3 Title-First Search (Default)** - Make content search opt-in
-- [ ] **1.4 Increase Cache TTL** - 30+ minutes instead of 5 minutes
+### Phase 1: Search Quick Wins [COMPLETE]
+- [x] **1.1 Add Search Debouncing** - 150ms debounce in NoteList.tsx
+- [ ] **1.2 Pre-build Fuse Index on Cache Creation** - SKIPPED (search already fast)
+- [x] **1.3 Title-First Search** - Only searches content when <20 title matches
+- [x] **1.4 Increase Cache TTL** - 30 minutes (was 5 minutes)
+- [x] **1.5 Fix tagsForNotes() bottleneck** - Was reading ALL files twice (1593ms → 0.38ms, 4200x faster!)
+- [x] **1.6 Reduce MAX_RENDERED_NOTES** - 1000 → 100 items
+- [x] **1.7 Add perf.ts utility** - Toggle PERF_ENABLED for debugging
 
 ### Phase 2: Structural Improvements
 - [ ] **2.1 Lazy Content Loading** - Two-phase search: title filter → content refinement

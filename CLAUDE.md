@@ -50,21 +50,25 @@ ssh bishop "powershell -Command \"Copy-Item -Path 'C:\\Users\\josh\\.config\\ray
 ### Caching
 - Uses Raycast's Cache API (`@raycast/api`)
 - Cache key: vault name
-- Current TTL: 5 minutes (optimization plan suggests 30 min)
+- Cache TTL: 30 minutes
+
+### Performance Debugging
+- `src/utils/perf.ts` - Toggle `PERF_ENABLED = true` to log performance metrics
+- Logs written to `C:\Users\josh\obsidian-perf.log` (Windows) or `/tmp/obsidian-perf.log`
 
 ## Current Project Phase
 
-**Phase 0: Project Setup** - See [OPTIMIZATION_PLAN.md](./OPTIMIZATION_PLAN.md)
+**Phase 2: Structural Improvements** - See [OPTIMIZATION_PLAN.md](./OPTIMIZATION_PLAN.md)
 
-- [x] Fix critical Windows bugs
-- [x] Implement lazy loading for large vaults
-- [x] Add image attachment rendering
-- [x] Handle Excalidraw files gracefully
-- [x] Create project documentation
-- [ ] Initialize git repository ← **CURRENT**
-- [ ] Implement Phase 1 optimizations
-- [ ] Run security audit
-- [ ] Publish
+- [x] Phase 0: Project Setup (complete)
+- [x] Phase 1: Search Quick Wins (complete)
+  - Fixed `tagsForNotes()` bottleneck (1593ms → 0.38ms, 4200x faster)
+  - Added 150ms search debouncing
+  - Title-first search optimization
+  - Reduced MAX_RENDERED_NOTES to 100
+- [ ] Phase 2: Structural Improvements ← **NEXT**
+- [ ] Phase 3: Advanced Optimizations (optional)
+- [ ] Phase 4: Security audit & Publication
 
 ## Test Vaults on Bishop
 
@@ -76,12 +80,14 @@ ssh bishop "powershell -Command \"Copy-Item -Path 'C:\\Users\\josh\\.config\\ray
 | File | Changes |
 |------|---------|
 | `src/api/vault/vault.service.ts` | Lazy loading, cross-platform paths, image conversion, Excalidraw handling |
-| `src/utils/search.tsx` | Uses `getNoteContent()` for lazy loading |
-| `src/utils/yaml.tsx` | Uses `getNoteContent()` for lazy loading |
-| `src/utils/actions.tsx` | Uses `getNoteContent()` for lazy loading |
-| `src/components/NoteQuickLook.tsx` | Passes vault for image resolution |
+| `src/api/cache/cache.service.ts` | 30-minute cache TTL |
+| `src/utils/search.tsx` | Title-first search optimization, content search only when <20 title matches |
+| `src/utils/yaml.tsx` | Fixed `tagsForNotes()` to use pre-extracted tags (was 4200x slower) |
+| `src/utils/constants.tsx` | MAX_RENDERED_NOTES=100, image regex |
+| `src/utils/perf.ts` | Performance debugging utility (toggle PERF_ENABLED) |
+| `src/components/NoteList/NoteList.tsx` | 150ms search debouncing |
 | `src/components/NoteList/NoteListItem.tsx` | Uses `useMemo` with lazy content loading |
-| `src/utils/constants.tsx` | Added `OBSIDIAN_IMAGE_EMBED_REGEX` |
+| `src/components/NoteQuickLook.tsx` | Passes vault for image resolution |
 
 ## Known Issues Fixed
 
