@@ -8,7 +8,7 @@ import { getNoteContent } from "../api/vault/vault.service";
  *
  * @param notes - The notes to load the media for
  * @param input - Search input
- * @param byContent - If true, will use the content of the note to filter.
+ * @param byContent - If true, will use the content of the note to filter (only when title matches are insufficient).
  * @returns - A list of notes filtered according to the input search string
  */
 export function filterNotes(notes: Note[], input: string, byContent: boolean) {
@@ -18,16 +18,25 @@ export function filterNotes(notes: Note[], input: string, byContent: boolean) {
 
   input = input.toLowerCase();
 
-  if (byContent) {
-    return notes.filter(
+  // Always do fast title/path filter first
+  const titleMatches = notes.filter(
+    (note) =>
+      note.title.toLowerCase().includes(input) ||
+      note.path.toLowerCase().includes(input)
+  );
+
+  // Only search content if enabled AND title search found few results
+  if (byContent && titleMatches.length < 20) {
+    const titleMatchPaths = new Set(titleMatches.map((n) => n.path));
+    const contentMatches = notes.filter(
       (note) =>
-        getNoteContent(note, false).toLowerCase().includes(input) ||
-        note.title.toLowerCase().includes(input) ||
-        note.path.toLowerCase().includes(input)
+        !titleMatchPaths.has(note.path) &&
+        getNoteContent(note, false).toLowerCase().includes(input)
     );
-  } else {
-    return notes.filter((note) => note.title.toLowerCase().includes(input));
+    return [...titleMatches, ...contentMatches];
   }
+
+  return titleMatches;
 }
 
 export function filterNotesFuzzy(notes: Note[], input: string, byContent: boolean) {

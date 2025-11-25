@@ -80,7 +80,8 @@ export function deleteNoteFromCache(vault: Vault, note: Note) {
 export function getNotesFromCache(vault: Vault) {
   if (cacheExistForVault(vault)) {
     const data = JSON.parse(cache.get(vault.name) ?? "{}");
-    if (data.notes?.length > 0 && data.lastCached > Date.now() - 1000 * 60 * 5) {
+    // Cache TTL: 30 minutes (increased from 5 for better performance)
+    if (data.notes?.length > 0 && data.lastCached > Date.now() - 1000 * 60 * 30) {
       const notes_ = data.notes as Note[];
       logger.info("Using cached notes.");
       return notes_;

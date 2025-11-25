@@ -1,5 +1,5 @@
 import { List, getPreferenceValues, ActionPanel, Action, open } from "@raycast/api";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 import { NoteListProps } from "../../utils/interfaces";
 import { MAX_RENDERED_NOTES } from "../../utils/constants";
@@ -17,11 +17,20 @@ export function NoteList(props: NoteListProps) {
   const pref = getPreferenceValues<SearchNotePreferences>();
   const allNotes = useNotesContext();
   const [searchText, setSearchText] = useState(searchArguments.searchArgument ?? "");
+  const [debouncedSearchText, setDebouncedSearchText] = useState(searchText);
+
+  // Debounce search input by 150ms to reduce unnecessary filtering
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearchText(searchText), 150);
+    return () => clearTimeout(timer);
+  }, [searchText]);
+
   const searchFunction = pref.fuzzySearch ? filterNotesFuzzy : filterNotes;
-  const list = useMemo(() => searchFunction(notes ?? [], searchText, pref.searchContent), [notes, searchText]);
+
+  const list = useMemo(() => searchFunction(notes ?? [], debouncedSearchText, pref.searchContent), [notes, debouncedSearchText]);
   const _notes = list.slice(0, MAX_RENDERED_NOTES);
 
-  const tags = tagsForNotes(allNotes);
+  const tags = useMemo(() => tagsForNotes(allNotes), [allNotes]);
 
   function onNoteCreation() {
     const target = getObsidianTarget({ type: ObsidianTargetType.NewNote, vault: vault, name: searchText });

@@ -37,9 +37,10 @@ This extension started as a fork of the original [obsidian-raycast](https://gith
 - [x] Add image attachment rendering
 - [x] Handle Excalidraw files gracefully
 - [x] Create project documentation (CLAUDE.md, OPTIMIZATION_PLAN.md)
-- [ ] Initialize git repository
-- [ ] Create comprehensive README with credits
-- [ ] Add DEVELOPMENT_STORY.md with full narrative
+- [x] Initialize git repository
+- [x] Create comprehensive README with credits
+- [x] Add DEVELOPMENT_STORY.md with full narrative
+- [ ] Create GitHub repository and push
 
 ### Phase 1: Search Quick Wins
 - [ ] **1.1 Add Search Debouncing** - Debounce search input by 150-200ms

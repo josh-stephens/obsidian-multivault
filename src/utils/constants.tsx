@@ -4,7 +4,9 @@
 
 import { Image } from "@raycast/api";
 
-export const MAX_RENDERED_NOTES = 1000;
+// PERF: Reduced from 1000 to 100 - Raycast UI doesn't need to render 1000 items
+// Users can refine search to find specific notes
+export const MAX_RENDERED_NOTES = 100;
 export const BYTES_PER_KILOBYTE = 1024;
 export const BYTES_PER_MEGABYTE = BYTES_PER_KILOBYTE ** 2;
 export const BYTES_PER_GIGABYTE = BYTES_PER_MEGABYTE ** 2;

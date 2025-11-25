@@ -74,14 +74,16 @@ function yamlTagsForNotes(notes: Note[]) {
 }
 
 export function tagsForNotes(notes: Note[]) {
-  const foundTags = inlineTagsForNotes(notes);
-  const foundYAMLTags = yamlTagsForNotes(notes);
-  for (const tag of foundYAMLTags) {
-    if (!foundTags.includes(tag)) {
-      foundTags.push(tag);
+  // PERF FIX: Use pre-extracted tags from notes instead of re-reading all files
+  // The old implementation called getNoteContent() for every note twice,
+  // causing 1.5+ second delays with large vaults
+  const tagSet = new Set<string>();
+  for (const note of notes) {
+    for (const tag of note.tags) {
+      tagSet.add(tag);
     }
   }
-  return foundTags.sort(sortByAlphabet);
+  return Array.from(tagSet).sort(sortByAlphabet);
 }
 
 //--------------------------------------------------------------------------------
