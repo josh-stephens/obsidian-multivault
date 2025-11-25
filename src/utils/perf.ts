@@ -4,9 +4,7 @@
  * To enable performance logging:
  * 1. Set PERF_ENABLED = true below
  * 2. Rebuild the extension
- * 3. Logs will be written to:
- *    - Windows: C:\Users\josh\obsidian-perf.log
- *    - macOS/Linux: /tmp/obsidian-perf.log
+ * 3. Logs will be written to: ~/.obsidian-raycast-perf.log
  *
  * Usage:
  *   import { perfLog, perfStart, perfEnd } from "../utils/perf";
@@ -21,12 +19,14 @@
  */
 
 import fs from "fs";
+import os from "os";
+import path from "path";
 
 // Toggle this to enable/disable performance logging
-const PERF_ENABLED = false;
+const PERF_ENABLED = true;
 
-const PERF_LOG_PATH =
-  process.platform === "win32" ? "C:\\Users\\josh\\obsidian-perf.log" : "/tmp/obsidian-perf.log";
+// Use user's home directory for perf log - works for any user
+const PERF_LOG_PATH = path.join(os.homedir(), ".obsidian-raycast-perf.log");
 
 export function perfLog(msg: string): void {
   if (!PERF_ENABLED) return;

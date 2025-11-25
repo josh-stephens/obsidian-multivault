@@ -51,9 +51,8 @@ export function filterNotesFuzzy(notes: Note[], input: string, byContent: boolea
     threshold: 0.3,
   };
 
-  if (byContent) {
-    options.keys.push("content");
-  }
+  // Note: Don't add "content" to Fuse keys - notes don't have content loaded (lazy loading)
+  // Content search is done separately below when title/path search yields few results
 
   // Filter by each word individually, this helps with file path search
   const words = input.trim().split(/\s+/);
@@ -63,6 +62,17 @@ export function filterNotesFuzzy(notes: Note[], input: string, byContent: boolea
   for (const word of words) {
     filteredNotes = fuse.search(word).map((result) => result.item);
     fuse.setCollection(filteredNotes);
+  }
+
+  // Only search content if enabled AND title/path search found few results
+  if (byContent && filteredNotes.length < 20) {
+    const titleMatchPaths = new Set(filteredNotes.map((n) => n.path));
+    const remainingNotes = notes.filter((n) => !titleMatchPaths.has(n.path));
+    const contentMatches = remainingNotes.filter((note) => {
+      const content = getNoteContent(note, false).toLowerCase();
+      return words.every((word) => content.includes(word.toLowerCase()));
+    });
+    return [...filteredNotes, ...contentMatches];
   }
 
   return filteredNotes;

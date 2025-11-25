@@ -95,6 +95,15 @@ function createObsidianProperties(tags: string[]): string {
 }
 
 /**
+ * Checks if a file path is within a directory (prevents path traversal attacks)
+ */
+function isPathWithinDirectory(filePath: string, directory: string): boolean {
+  const resolvedPath = path.resolve(filePath);
+  const resolvedDirectory = path.resolve(directory);
+  return resolvedPath.startsWith(resolvedDirectory + path.sep) || resolvedPath === resolvedDirectory;
+}
+
+/**
  * Saves a string to disk with filename name.
  *
  * @param content - The content of the note
@@ -102,22 +111,35 @@ function createObsidianProperties(tags: string[]): string {
  * @returns - True if the note was saved successfully
  */
 async function saveStringToDisk(vaultPath: string, content: string, name: string, notePath: string) {
-  const fullPath = path.join(vaultPath, notePath);
+  // Sanitize inputs to prevent path traversal
+  const sanitizedNotePath = notePath.replace(/\.\.[\/\\]/g, "");
+  const sanitizedName = name.replace(/\.\.[\/\\]/g, "").replace(/[<>:"|?*]/g, "_");
+  const fullPath = path.join(vaultPath, sanitizedNotePath);
 
-  if (fs.existsSync(path.join(fullPath, name + ".md"))) {
+  // Validate that the resolved path is within the vault
+  if (!isPathWithinDirectory(fullPath, vaultPath)) {
+    showToast({
+      title: "Invalid path",
+      message: "Cannot create notes outside the vault directory",
+      style: Toast.Style.Failure,
+    });
+    return false;
+  }
+
+  if (fs.existsSync(path.join(fullPath, sanitizedName + ".md"))) {
     if (
       await confirmAlert({
         title: "Override note",
-        message: 'Are you sure you want to override the note: "' + name + '"?',
+        message: 'Are you sure you want to override the note: "' + sanitizedName + '"?',
         icon: Icon.ExclamationMark,
       })
     ) {
-      writeTextToMarkdownFile(fullPath, name, content);
+      writeTextToMarkdownFile(fullPath, sanitizedName, content);
       return true;
     }
     return false;
   } else {
-    writeTextToMarkdownFile(fullPath, name, content);
+    writeTextToMarkdownFile(fullPath, sanitizedName, content);
     return true;
   }
 }

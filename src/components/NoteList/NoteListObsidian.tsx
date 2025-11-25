@@ -5,7 +5,7 @@ import { SearchArguments } from "../../utils/interfaces";
 import { NoteList } from "./NoteList";
 import { NoteActions, OpenNoteActions } from "../../utils/actions";
 import { NoteReducer } from "../../utils/reducers";
-import { Action, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon } from "@raycast/api";
 import { Vault } from "../../api/vault/vault.types";
 import { Note } from "../../api/vault/notes/notes.types";
 import { renewCache } from "../../api/cache/cache.service";
@@ -15,8 +15,9 @@ export function NoteListObsidian(props: {
   showTitle: boolean;
   bookmarked: boolean;
   searchArguments: SearchArguments;
+  onSwitchVault?: () => void;
 }) {
-  const { showTitle, vault, searchArguments } = props;
+  const { showTitle, vault, searchArguments, onSwitchVault } = props;
 
   const [allNotes] = useNotes(vault, props.bookmarked);
   const [currentViewNoteList, dispatch] = useReducer(NoteReducer, allNotes);
@@ -34,7 +35,17 @@ export function NoteListObsidian(props: {
               <React.Fragment>
                 <OpenNoteActions note={note} notes={allNotes} vault={vault} />
                 <NoteActions notes={allNotes} note={note} vault={vault} />
-                <Action title="Reload Notes" icon={Icon.ArrowClockwise} onAction={() => renewCache(vault)}></Action>
+                <ActionPanel.Section>
+                  <Action title="Reload Notes" icon={Icon.ArrowClockwise} onAction={() => renewCache(vault)} />
+                  {onSwitchVault && (
+                    <Action
+                      title="Switch Vault"
+                      icon={Icon.Globe}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                      onAction={onSwitchVault}
+                    />
+                  )}
+                </ActionPanel.Section>
               </React.Fragment>
             );
           }}

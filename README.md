@@ -32,7 +32,7 @@ An enhanced Raycast extension for [Obsidian](https://obsidian.md/) with comprehe
 - **Tag extraction** - Reads only first 2KB of files for YAML frontmatter
 
 ### Enhanced Rendering
-- **Image attachments** - Obsidian `![[image.jpg]]` syntax now renders in previews
+- **Image attachments** - Obsidian `![[image.jpg]]` syntax handled gracefully (external URLs render; local images show as `📷 filename` placeholders due to Raycast markdown limitations)
 - **Excalidraw support** - Drawing files show friendly message instead of raw JSON
 - **Smart path resolution** - Finds images in attachment folders, vault root, or same folder
 
@@ -48,10 +48,10 @@ This fork adds powerful multi-vault features while maintaining full compatibilit
 
 - **Vault Management** - Customize display names, emojis, abbreviations, and colors for each vault
 - **Favorites & Active Vault** - Mark vaults as favorites and set an active vault for quick access
+- **Smart Vault Selection** - When "Skip Vault Selection" is enabled, commands go directly to your active vault (Cmd+Shift+V to switch)
 - **Vault Quick Switcher** - Rapidly switch between vaults with keyboard shortcuts
 - **Recent Notes Across Vaults** - View recently modified notes from all vaults in one unified view
 - **Cross-Vault Search** - Search notes across all vaults simultaneously (when enabled)
-- **Smart Vault Selection** - Auto-select active vault or show selection based on preferences
 - **Vault Indicators** - Visual badges and labels showing which vault each note belongs to
 - **Persistent Configuration** - Vault metadata and preferences stored locally
 
@@ -65,7 +65,7 @@ This fork adds powerful multi-vault features while maintaining full compatibilit
 
 Access multi-vault preferences in Raycast Settings → Extensions → Obsidian Multi-Vault:
 
-- **Use Active Vault as Default** - Auto-select the active vault instead of showing vault selection
+- **Skip Vault Selection (Use Active Vault)** - Skip the vault picker and go directly to your active vault. Use Cmd+Shift+V to switch vaults within commands, or set your active vault in Vault Switcher.
 - **Show Vault Indicators in Results** - Display vault badges/labels in search results
 - **Vault Indicator Style** - Choose between badge, subtitle, or both
 - **Enable Cross-Vault Search** - Allow searching across all vaults simultaneously

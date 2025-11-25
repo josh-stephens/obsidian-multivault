@@ -23,10 +23,15 @@ function getBookmarksJson(vault: Vault): BookMarkJson | undefined {
     logger.warning("No bookmarks JSON found");
     return;
   }
-  const fileContent = fs.readFileSync(bookmarksJsonPath, "utf-8");
-  const bookmarkJson = JSON.parse(fileContent) as BookMarkJson;
-  logger.info(bookmarkJson);
-  return bookmarkJson;
+  try {
+    const fileContent = fs.readFileSync(bookmarksJsonPath, "utf-8");
+    const bookmarkJson = JSON.parse(fileContent) as BookMarkJson;
+    logger.info(bookmarkJson);
+    return bookmarkJson;
+  } catch (e) {
+    logger.error(`Failed to parse bookmarks.json: ${e}`);
+    return;
+  }
 }
 
 function writeBookmarksJson(vault: Vault, bookmarksJson: BookMarkJson) {

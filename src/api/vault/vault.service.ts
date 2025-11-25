@@ -237,6 +237,15 @@ function getAttachmentFolderPath(vault: Vault): string {
 }
 
 /**
+ * Checks if a file path is within a vault directory (prevents path traversal attacks)
+ */
+function isPathWithinVault(filePath: string, vaultPath: string): boolean {
+  const resolvedPath = path.resolve(filePath);
+  const resolvedVault = path.resolve(vaultPath);
+  return resolvedPath.startsWith(resolvedVault + path.sep) || resolvedPath === resolvedVault;
+}
+
+/**
  * Resolves an Obsidian image filename to its absolute path.
  * Searches in:
  * 1. The configured attachment folder
@@ -244,10 +253,13 @@ function getAttachmentFolderPath(vault: Vault): string {
  * 3. Recursively through the vault (for images in subfolders)
  */
 function resolveImagePath(imageName: string, vault: Vault, notePath?: string): string | null {
+  // Sanitize the image name to prevent path traversal
+  const sanitizedImageName = imageName.replace(/\.\.[\/\\]/g, "");
+
   // If imageName already has a path (contains / or \), try that first
-  if (imageName.includes("/") || imageName.includes("\\")) {
-    const directPath = path.join(vault.path, imageName);
-    if (fs.existsSync(directPath)) {
+  if (sanitizedImageName.includes("/") || sanitizedImageName.includes("\\")) {
+    const directPath = path.join(vault.path, sanitizedImageName);
+    if (fs.existsSync(directPath) && isPathWithinVault(directPath, vault.path)) {
       return directPath;
     }
   }
@@ -258,29 +270,29 @@ function resolveImagePath(imageName: string, vault: Vault, notePath?: string): s
     // Handle Obsidian's special "./" prefix meaning same folder as note
     if (attachmentFolder === "./" && notePath) {
       const noteDir = path.dirname(notePath);
-      const sameFolderPath = path.join(noteDir, imageName);
-      if (fs.existsSync(sameFolderPath)) {
+      const sameFolderPath = path.join(noteDir, sanitizedImageName);
+      if (fs.existsSync(sameFolderPath) && isPathWithinVault(sameFolderPath, vault.path)) {
         return sameFolderPath;
       }
     } else {
-      const attachmentPath = path.join(vault.path, attachmentFolder, imageName);
-      if (fs.existsSync(attachmentPath)) {
+      const attachmentPath = path.join(vault.path, attachmentFolder, sanitizedImageName);
+      if (fs.existsSync(attachmentPath) && isPathWithinVault(attachmentPath, vault.path)) {
         return attachmentPath;
       }
     }
   }
 
   // Try vault root
-  const rootPath = path.join(vault.path, imageName);
-  if (fs.existsSync(rootPath)) {
+  const rootPath = path.join(vault.path, sanitizedImageName);
+  if (fs.existsSync(rootPath) && isPathWithinVault(rootPath, vault.path)) {
     return rootPath;
   }
 
   // Try same folder as the note
   if (notePath) {
     const noteDir = path.dirname(notePath);
-    const sameFolderPath = path.join(noteDir, imageName);
-    if (fs.existsSync(sameFolderPath)) {
+    const sameFolderPath = path.join(noteDir, sanitizedImageName);
+    if (fs.existsSync(sameFolderPath) && isPathWithinVault(sameFolderPath, vault.path)) {
       return sameFolderPath;
     }
   }
@@ -296,7 +308,7 @@ function resolveImagePath(imageName: string, vault: Vault, notePath?: string): s
         const fullPath = path.join(dir, entry.name);
         if (entry.isDirectory()) {
           searchDirs.push(fullPath);
-        } else if (entry.name === imageName) {
+        } else if (entry.name === sanitizedImageName) {
           return fullPath;
         }
       }
@@ -309,23 +321,48 @@ function resolveImagePath(imageName: string, vault: Vault, notePath?: string): s
 }
 
 /**
- * Converts Obsidian image embeds (![[image.jpg]]) to standard markdown with absolute file paths.
- * This allows Raycast's markdown renderer to display the images.
+ * NOTE: Local image rendering in Raycast markdown is not supported on Windows.
+ *
+ * APPROACHES TRIED (all failed to render on Windows):
+ * 1. Base64 data URIs - Silently doesn't render
+ * 2. ~ paths with URL encoding (~/.../file.jpg) - Doesn't work on Windows
+ * 3. Absolute paths with forward slashes (C:/Users/...) - Doesn't render
+ * 4. file:// URL format (file:///C:/...) - Doesn't render
+ * 5. Raw absolute path with backslashes - Shows raw markdown, doesn't render
+ *
+ * Raycast officially only supports: asset-relative paths and https:// URLs
+ * We now show placeholder text for local images instead.
+ */
+
+/**
+ * Converts Obsidian image embeds (![[image.jpg]]) to placeholder text.
+ * Raycast's markdown renderer doesn't support local file paths on Windows,
+ * so we show a placeholder indicating the image name instead.
  */
 export function convertObsidianImages(content: string, vault: Vault, notePath?: string): string {
   // Reset regex state
   OBSIDIAN_IMAGE_EMBED_REGEX.lastIndex = 0;
 
+  // Debug: log what we're processing
+  const matches = content.match(OBSIDIAN_IMAGE_EMBED_REGEX);
+  console.log(`[convertObsidianImages] Found ${matches?.length || 0} image embeds in content`);
+  if (matches) {
+    console.log(`[convertObsidianImages] Matches: ${JSON.stringify(matches)}`);
+  }
+
   return content.replace(OBSIDIAN_IMAGE_EMBED_REGEX, (match, imagePath, _ext, altText) => {
+    console.log(`[convertObsidianImages] Processing: ${match}, imagePath: ${imagePath}`);
     const resolvedPath = resolveImagePath(imagePath, vault, notePath);
+    console.log(`[convertObsidianImages] Resolved path: ${resolvedPath}`);
     if (resolvedPath) {
-      const alt = altText || path.basename(imagePath);
-      // Use file:// protocol for local files
-      const fileUrl = `file://${resolvedPath.replace(/\\/g, "/")}`;
-      return `![${alt}](${fileUrl})`;
+      // Raycast's markdown renderer doesn't support local file paths on Windows
+      // Show a placeholder with the image name instead
+      const displayName = altText || path.basename(imagePath);
+      return `\`📷 ${displayName}\``;
     }
-    // If image not found, keep original syntax but make it visible
-    return `[Image not found: ${imagePath}]`;
+    // If image not found, indicate that
+    console.log(`[convertObsidianImages] Image not found: ${imagePath}`);
+    return `\`📷 ${imagePath} (not found)\``;
   });
 }
 
@@ -362,10 +399,9 @@ function formatExcalidrawContent(content: string, vault?: Vault, notePath?: stri
     for (const file of embeddedFiles) {
       const resolvedPath = resolveImagePath(file, vault, notePath);
       if (resolvedPath) {
-        const fileUrl = `file://${resolvedPath.replace(/\\/g, "/")}`;
-        result += `![${file}](${fileUrl})\n\n`;
+        result += `- \`📷 ${file}\`\n`;
       } else {
-        result += `- ${file} (not found)\n`;
+        result += `- \`📷 ${file} (not found)\`\n`;
       }
     }
   }

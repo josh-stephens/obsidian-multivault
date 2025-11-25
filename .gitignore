@@ -35,3 +35,9 @@ npm-debug.log*
 
 # Session files (temporary)
 SESSION-SUMMARY.md
+
+# Claude Code local settings
+.claude/
+
+# Socket files
+skip

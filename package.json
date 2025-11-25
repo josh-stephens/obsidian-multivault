@@ -26,54 +26,24 @@
       "placeholder": "path/to/vault",
       "title": "Path to Vault",
       "required": false,
-      "description": "Specify the path or multiple paths (comma separated) to your vault/vaults"
+      "description": "Specify the path or multiple paths (comma separated) to your vault/vaults. Leave empty to auto-detect from Obsidian."
     },
     {
-      "name": "configFileName",
-      "type": "textfield",
-      "placeholder": ".obsidian",
-      "title": "Config filename",
+      "name": "useActiveVaultAsDefault",
+      "title": "Multi-Vault Behavior",
+      "label": "Skip Vault Selection (Use Active Vault)",
+      "type": "checkbox",
       "required": false,
-      "default": ".obsidian",
-      "description": "Override the vault config filename (default: .obsidian)"
+      "default": true,
+      "description": "Go directly to your active vault instead of showing vault picker. Use Cmd+Shift+V to switch vaults."
     },
     {
       "name": "excludedFolders",
       "type": "textfield",
       "placeholder": "folder1, folder2, ...",
-      "title": "Exclude following folders",
+      "title": "Excluded Folders",
       "required": false,
-      "description": "Specify which folders to exclude (comma separated)"
-    },
-    {
-      "name": "removeYAML",
-      "title": "Remove content",
-      "label": "Hide YAML frontmatter",
-      "type": "checkbox",
-      "required": false,
-      "description": "Hide YAML frontmatter for copying and viewing notes"
-    },
-    {
-      "name": "removeLatex",
-      "label": "Hide LaTeX",
-      "type": "checkbox",
-      "required": false,
-      "description": "Hide LaTeX (surrounded by $$ or $) for copying and viewing notes"
-    },
-    {
-      "name": "removeLinks",
-      "label": "Hide Links",
-      "type": "checkbox",
-      "required": false,
-      "description": "Hide links for copying and viewing notes"
-    },
-    {
-      "name": "useActiveVaultAsDefault",
-      "label": "Use Active Vault as Default",
-      "type": "checkbox",
-      "required": false,
-      "default": true,
-      "description": "Automatically use the active vault instead of showing vault selection"
+      "description": "Folders to exclude from search results (comma separated)"
     },
     {
       "name": "showVaultIndicatorsInResults",
@@ -81,7 +51,7 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "description": "Display vault name/badge in search results for cross-vault operations"
+      "description": "Display vault name/badge in search results when using multiple vaults"
     },
     {
       "name": "vaultIndicatorStyle",
@@ -111,7 +81,38 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "description": "Allow searching across all vaults simultaneously"
+      "description": "Search all vaults at once in Recent Notes command"
+    },
+    {
+      "name": "removeYAML",
+      "title": "Content Display",
+      "label": "Hide YAML Frontmatter",
+      "type": "checkbox",
+      "required": false,
+      "description": "Hide YAML frontmatter when viewing and copying notes"
+    },
+    {
+      "name": "removeLatex",
+      "label": "Hide LaTeX",
+      "type": "checkbox",
+      "required": false,
+      "description": "Hide LaTeX (surrounded by $$ or $) when viewing and copying notes"
+    },
+    {
+      "name": "removeLinks",
+      "label": "Hide Wikilinks",
+      "type": "checkbox",
+      "required": false,
+      "description": "Hide [[wikilinks]] when viewing and copying notes"
+    },
+    {
+      "name": "configFileName",
+      "type": "textfield",
+      "placeholder": ".obsidian",
+      "title": "Advanced",
+      "required": false,
+      "default": ".obsidian",
+      "description": "Override vault config folder name (default: .obsidian). Only change if using custom config."
     }
   ],
   "commands": [

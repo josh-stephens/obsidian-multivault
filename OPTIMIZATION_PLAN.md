@@ -2,14 +2,14 @@
 
 > Generated: 2025-11-25
 > Updated: 2025-11-25
-> Status: Phase 1 Complete, Phase 2 Mostly Complete, Ready for Security Audit
+> Status: **All Phases Complete - Ready for Publication**
 
 ## Project Goals
 
-1. Fix critical bugs preventing Windows usage
-2. Optimize search performance for large vaults
-3. Publish as open source with full documentation
-4. Run security audit before release
+1. ~~Fix critical bugs preventing Windows usage~~ **DONE**
+2. ~~Optimize search performance for large vaults~~ **DONE**
+3. ~~Run security audit before release~~ **DONE**
+4. Publish as open source with full documentation
 
 ---
 
@@ -27,6 +27,7 @@ This extension started as a fork of the original [obsidian-raycast](https://gith
 | Excalidraw files display raw JSON | No special handling for Excalidraw format | Detect and show friendly message |
 | Images not rendering | Obsidian `![[image]]` syntax not converted | Convert to standard markdown with `file://` paths |
 | Cross-platform config paths | macOS-only Obsidian config path | Added `getObsidianConfigPath()` for Win/Mac/Linux |
+| React useMemo null error | raycast-x folder had source files instead of built JS | Fixed deployment workflow |
 
 ---
 
@@ -45,216 +46,121 @@ This extension started as a fork of the original [obsidian-raycast](https://gith
 
 ### Phase 1: Search Quick Wins [COMPLETE]
 - [x] **1.1 Add Search Debouncing** - 150ms debounce in NoteList.tsx
-- [ ] **1.2 Pre-build Fuse Index on Cache Creation** - SKIPPED (search already fast)
+- [x] **1.2 Pre-build Fuse Index** - SKIPPED (search already fast enough)
 - [x] **1.3 Title-First Search** - Only searches content when <20 title matches
 - [x] **1.4 Increase Cache TTL** - 30 minutes (was 5 minutes)
 - [x] **1.5 Fix tagsForNotes() bottleneck** - Was reading ALL files twice (1593ms → 0.38ms, 4200x faster!)
 - [x] **1.6 Reduce MAX_RENDERED_NOTES** - 1000 → 100 items
 - [x] **1.7 Add perf.ts utility** - Toggle PERF_ENABLED for debugging
 
-### Phase 2: Structural Improvements [MOSTLY COMPLETE]
-- [x] **2.1 Lazy Content Loading** - Two-phase search implemented in `search.tsx` (title/path first, content only when <20 matches)
-- [~] **2.2 Progressive Results** - Title matches shown first; true async would need React Suspense (deferred)
-- [ ] **2.3 Smarter Fuse.js Config** - Field weights needed; also `filterNotesFuzzy()` has bug (content key added but notes have no content loaded)
-- [ ] **2.4 Index Content Excerpt** - First 5000 chars only (deferred - not critical)
+### Phase 2: Structural Improvements [COMPLETE]
+- [x] **2.1 Lazy Content Loading** - Two-phase search in `search.tsx` (title/path first, content only when <20 matches)
+- [x] **2.2 Progressive Results** - Title matches shown first
+- [x] **2.3 Fix Fuse.js Bug** - Removed broken "content" key (notes have no content due to lazy loading), added two-phase content search to `filterNotesFuzzy()`
+- [x] **2.4 Index Content Excerpt** - SKIPPED (not needed with lazy loading)
+- [x] **2.5 Active Vault Feature** - SmartVaultSelection now wired to all main commands, auto-selects active vault, Cmd+Shift+V to switch
+- [x] **2.6 Image Rendering** - Fixed by converting to base64 data URIs (Raycast doesn't support file:// URLs)
+- [x] **2.7 Settings UX** - Reorganized preferences with section titles, better order, clearer descriptions
 
-### Phase 3: Advanced Optimizations (Optional)
-- [ ] **3.1 Switch to MiniSearch** - BM25 algorithm, better relevance
-- [ ] **3.2 Background Index Updates** - Incremental updates vs full rebuild
+### Phase 3: Advanced Optimizations [SKIPPED]
+- [ ] **3.1 Switch to MiniSearch** - Not needed, Fuse.js performs well
+- [ ] **3.2 Background Index Updates** - Not needed with current cache TTL
 
-### Phase 4: Publication
-- [ ] Run security audit
-- [ ] Fix any security issues found
-- [ ] Final testing on Windows and macOS
-- [ ] Publish to GitHub
+### Phase 4: Security & Publication [COMPLETE]
+- [x] Run security audit
+- [x] Fix path traversal vulnerabilities in `notes.service.ts`
+- [x] Fix path traversal vulnerabilities in `vault.service.ts` (image resolution)
+- [x] Fix hardcoded username in `perf.ts`
+- [x] Add error handling to `bookmarks.service.ts`
+- [x] Final testing on Windows (bishop)
+- [ ] Publish to GitHub (public)
 - [ ] Submit to Raycast Store (optional)
 
 ---
 
-## Current Architecture Issues
+## Security Audit Results
 
-### 1. Initial Load Time [FIXED]
-- ~~`getNotesFromCache()` loads ALL notes synchronously on vault selection~~ Now loads metadata only
-- Cache stores metadata (no pre-built search index) - acceptable tradeoff
-- ~~5-minute cache TTL means frequent re-reads from disk~~ Now 30 minutes
+Security audit completed on 2025-11-25. All critical and high-severity issues fixed:
 
-### 2. Search Performance [FIXED]
-- ~~`filterNotes()` with `byContent=true` calls `getNoteContent()` for EVERY note on EVERY keystroke~~ Now only when <20 title matches
-- Fuse.js re-indexes the entire collection on each search (acceptable for <1300 notes)
-- ~~No debouncing on search input~~ Now 150ms debounce
-
-### 3. Content Search [IMPROVED]
-- Content loaded on-demand only when title search yields <20 results
-- No pre-built search index - but with lazy loading this is acceptable
+| Severity | Issue | File | Fix |
+|----------|-------|------|-----|
+| CRITICAL | Path traversal in note creation | `notes.service.ts` | Added `isPathWithinDirectory()` validation + input sanitization |
+| HIGH | Path traversal in image resolution | `vault.service.ts` | Added `isPathWithinVault()` validation + input sanitization |
+| MEDIUM | Hardcoded username in log path | `perf.ts` | Changed to `os.homedir()` |
+| LOW | Unhandled JSON parse error | `bookmarks.service.ts` | Added try-catch wrapper |
 
 ---
 
-## Omnisearch Research
+## Architecture Summary
 
-Research from https://github.com/scambier/obsidian-omnisearch
+### Note Loading (Lazy Loading)
+- `loadNotes()` in `vault.service.ts` only loads metadata initially
+- Content loaded on-demand via `getNoteContent(note, filter, vault)`
+- Tags extracted from first 2KB of files for performance
 
-### Key Techniques Used by Omnisearch
+### Search Flow
+1. **Debouncing**: 150ms delay before search executes
+2. **Title/Path Search**: Fast Fuse.js fuzzy search on metadata only
+3. **Content Search**: Only triggered when title matches < 20, loads content on-demand
+4. **Result Limiting**: MAX_RENDERED_NOTES = 100
 
-1. **MiniSearch Library** - Full-text search with BM25 algorithm
-2. **IndexedDB Caching** - Serialized search index persisted to disk
-3. **Lazy Reindexing** - Files flagged for update, batch processed when search opens
-4. **Chunked Processing** - 500-document batches to prevent memory spikes
-5. **Field Boosting** - Configurable weights for basename, aliases, headings, content
-6. **Recency Boost** - Exponential decay based on modification time
-7. **Result Limiting** - Top 50 results after scoring
+### Image Rendering
+- Obsidian `![[image.jpg]]` syntax converted to standard markdown
+- `convertObsidianImages()` resolves paths and uses `file://` protocol
+- Path traversal protection prevents accessing files outside vault
 
-### Comparison Table
+### Caching
+- Uses Raycast's Cache API (`@raycast/api`)
+- Cache key: vault name
+- Cache TTL: 30 minutes
 
-| Technique | Omnisearch | Our Current | Recommendation |
-|-----------|------------|-------------|----------------|
-| **Search Library** | MiniSearch (BM25) | Fuse.js (fuzzy) | Keep Fuse.js but optimize |
-| **Index Caching** | IndexedDB persistence | JSON cache (metadata only) | Add search index to cache |
-| **Lazy Indexing** | Deferred until search opened | None | Pre-build on cache creation |
-| **Chunked Processing** | 500-doc batches | All at once | Add chunking |
-| **Result Limit** | Top 50 results | 1000 max rendered | Keep similar |
-| **Field Boosting** | Configurable weights | Equal weights | Add title boost |
-| **Debouncing** | UI layer | Only List throttle | Add explicit debounce |
-
----
-
-## Technical Implementation Details
-
-### Phase 1.1: Search Debouncing
-
-**File:** `src/components/NoteList/NoteList.tsx`
-
-```typescript
-import { useDebouncedValue } from "@raycast/utils";
-
-// In component:
-const [searchText, setSearchText] = useState("");
-const debouncedSearchText = useDebouncedValue(searchText, 150);
-const list = useMemo(
-  () => searchFunction(notes ?? [], debouncedSearchText, pref.searchContent),
-  [notes, debouncedSearchText]
-);
-```
-
-### Phase 1.2: Pre-built Fuse Index
-
-**File:** `src/api/cache/cache.service.ts`
-
-```typescript
-import Fuse from "fuse.js";
-
-interface CachedData {
-  lastCached: number;
-  notes: Note[];
-  fuseIndex?: Fuse.FuseIndex<Note>;  // Serialized index
-}
-
-export function cacheNotesFor(vault: Vault) {
-  const notes = loadNotes(vault);
-
-  // Pre-build Fuse index
-  const fuse = new Fuse(notes, {
-    keys: ["title", "path"],
-    threshold: 0.3,
-    ignoreLocation: true,
-  });
-  const fuseIndex = fuse.getIndex();
-
-  cache.set(vault.name, JSON.stringify({
-    lastCached: Date.now(),
-    notes: notes,
-    fuseIndex: fuseIndex.toJSON()
-  }));
-
-  return { notes, fuseIndex };
-}
-```
-
-### Phase 1.3: Title-First Search
-
-**File:** `src/utils/search.tsx`
-
-```typescript
-export function filterNotes(notes: Note[], input: string, byContent: boolean) {
-  if (input.length === 0) return notes;
-
-  input = input.toLowerCase();
-
-  // Always do fast title/path filter first
-  let results = notes.filter(
-    (note) =>
-      note.title.toLowerCase().includes(input) ||
-      note.path.toLowerCase().includes(input)
-  );
-
-  // Only search content if enabled AND title search found few results
-  if (byContent && results.length < 10) {
-    const contentMatches = notes.filter(
-      (note) =>
-        !results.includes(note) &&
-        getNoteContent(note, false).toLowerCase().includes(input)
-    );
-    results = [...results, ...contentMatches];
-  }
-
-  return results;
-}
-```
-
-### Phase 1.4: Increase Cache TTL
-
-**File:** `src/api/cache/cache.service.ts`
-
-```typescript
-// Change from 5 minutes to 30 minutes
-const CACHE_TTL_MS = 1000 * 60 * 30;
-
-export function getNotesFromCache(vault: Vault) {
-  if (cacheExistForVault(vault)) {
-    const data = JSON.parse(cache.get(vault.name) ?? "{}");
-    if (data.notes?.length > 0 && data.lastCached > Date.now() - CACHE_TTL_MS) {
-      // ... use cache
-    }
-  }
-  // ... rebuild cache
-}
-```
+### Performance Debugging
+- `src/utils/perf.ts` - Toggle `PERF_ENABLED = true` to log metrics
+- Logs written to `~/.obsidian-raycast-perf.log`
 
 ---
 
-## Files to Modify
+## Deployment Workflow (Windows)
 
-### Phase 1
-- `src/components/NoteList/NoteList.tsx` - Debouncing
-- `src/api/cache/cache.service.ts` - Index caching, TTL
-- `src/utils/search.tsx` - Title-first search logic
-- `package.json` - Add @raycast/utils if not present
+```bash
+# 1. Edit files locally
 
-### Phase 2
-- `src/utils/hooks.tsx` - Progressive loading
-- `src/api/vault/vault.service.ts` - Content excerpts
+# 2. Build the extension
+npm run build
 
-### Phase 3
-- `package.json` - Add minisearch dependency
-- New file: `src/api/search/search-engine.ts`
+# 3. For Windows Raycast beta: copy to raycast-x folder
+# Build outputs to ~/.config/raycast/, but Raycast Windows reads from ~/.config/raycast-x/
+```
+
+**Windows Note**: `npm run build` outputs to `~/.config/raycast/extensions/`, but Raycast Windows beta reads from `~/.config/raycast-x/extensions/`. Copy the built extension to the correct location after building.
 
 ---
 
 ## Testing Checklist
 
-- [ ] Test with small vault (~100 notes)
-- [ ] Test with large vault (1000+ notes)
-- [ ] Verify search responsiveness (< 100ms feel)
-- [ ] Verify memory usage stays reasonable
-- [ ] Test cache invalidation works correctly
-- [ ] Test content search still finds results
-- [ ] Test on Windows (bishop)
+- [x] Test with small vault (~100 notes) - 711BF Family vault
+- [x] Test with large vault (1000+ notes) - Mine vault (1,276 notes)
+- [x] Verify search responsiveness (< 100ms feel)
+- [x] Verify memory usage stays reasonable (no heap overflow)
+- [x] Test cache invalidation works correctly
+- [x] Test content search still finds results
+- [x] Test on Windows (bishop)
 - [ ] Test on macOS (if available)
 
 ---
 
-## Notes
+## Files Modified from Original
 
-- Raycast's `@raycast/utils` package has `useDebouncedValue` hook
-- Fuse.js index is serializable via `getIndex().toJSON()` and `Fuse.parseIndex()`
-- MiniSearch also supports index serialization
-- Consider adding a "Rebuild Index" action for users
+| File | Changes |
+|------|---------|
+| `src/api/vault/vault.service.ts` | Lazy loading, cross-platform paths, image conversion, Excalidraw handling, path traversal protection |
+| `src/api/vault/notes/notes.service.ts` | Path traversal protection for note creation |
+| `src/api/vault/notes/bookmarks/bookmarks.service.ts` | JSON parse error handling |
+| `src/api/cache/cache.service.ts` | 30-minute cache TTL |
+| `src/utils/search.tsx` | Title-first search, two-phase content search, fixed Fuse.js bug |
+| `src/utils/yaml.tsx` | Fixed `tagsForNotes()` to use pre-extracted tags (4200x faster) |
+| `src/utils/constants.tsx` | MAX_RENDERED_NOTES=100, image regex |
+| `src/utils/perf.ts` | Performance debugging utility, dynamic log path |
+| `src/components/NoteList/NoteList.tsx` | 150ms search debouncing |
+| `src/components/NoteList/NoteListItem.tsx` | Uses `useMemo` with lazy content loading |
+| `src/components/NoteQuickLook.tsx` | Passes vault for image resolution |

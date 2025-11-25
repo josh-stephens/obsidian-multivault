@@ -48,7 +48,7 @@ Created a deployment workflow:
 After getting the extension to load, it couldn't find any vaults even though paths were configured.
 
 **Investigation:**
-User had configured vault paths with quotes: `"C:\Users\josh\Documents\Mine","C:\Users\josh\Documents\711BF Family"`
+User had configured vault paths with quotes: `"C:\Users\username\Documents\Vault1","C:\Users\username\Documents\Vault2"`
 
 **Root Cause:**
 The `parseVaults()` function split on commas but didn't handle quoted paths or strip quotes.
@@ -259,11 +259,90 @@ Performed thorough review of all optimizations to assess readiness for security 
 
 ---
 
+---
+
+## Session 7: Active Vault Feature & Image Rendering Fix
+
+### Problem: SmartVaultSelection Never Used
+
+User noticed that setting a vault as "Active" didn't actually do anything useful. Investigation revealed:
+
+- `SmartVaultSelection` component existed but was **never imported** by any command
+- Setting active vault only showed a checkmark icon and updated `lastAccessed` timestamp
+- The "Use Active Vault as Default" preference was disconnected
+
+**Root Cause:**
+The feature was half-implemented - the infrastructure was there but never wired up.
+
+**Solution:**
+
+1. **Wired SmartVaultSelection to all main commands:**
+   - `searchNoteCommand.tsx`
+   - `starredNotesCommand.tsx`
+   - `createNoteCommand.tsx`
+   - `randomNoteCommand.tsx`
+   - `searchMedia.tsx`
+
+2. **Added "Switch Vault" action** (Cmd+Shift+V) to NoteListObsidian for easy vault switching
+
+3. **Updated SmartVaultSelection** to pass an `onSwitchVault` callback to child components
+
+4. **Updated preference description** to clearly explain the feature:
+   > "When enabled, commands skip the vault picker and go directly to your active vault. Use Cmd+Shift+V to switch vaults, or set an active vault in Vault Switcher."
+
+**Result:** Active vault now works! Commands go directly to the active vault when enabled, with easy switching via keyboard shortcut.
+
+---
+
+### Problem: Images Not Rendering in Quick Look
+
+User reported that embedded images (`![[image.jpg]]`) weren't displaying in the Raycast preview.
+
+**Investigation:**
+- Our `convertObsidianImages()` function was converting to `file://` URLs
+- Raycast's markdown renderer doesn't support `file://` protocol for security reasons
+- The official Obsidian extension simply strips image syntax entirely
+
+**Root Cause:**
+Raycast sandboxes extensions and doesn't allow `file://` URLs in markdown to prevent potential security issues with arbitrary file access.
+
+**Solution:**
+Convert images to base64 data URIs instead:
+
+```typescript
+function imageToDataUri(imagePath: string): string | null {
+  // Skip images larger than 2MB to avoid memory issues
+  if (stats.size > 2 * 1024 * 1024) return null;
+
+  const imageBuffer = fs.readFileSync(imagePath);
+  const base64 = imageBuffer.toString("base64");
+  return `data:${mimeType};base64,${base64}`;
+}
+```
+
+**Safeguards:**
+- Images > 2MB show "[Image: filename (too large to preview)]"
+- Missing images show "[Image not found: filename]"
+- MIME type properly detected from file extension
+
+**Result:** Images now render inline in the Quick Look preview!
+
+---
+
+### Settings Interface Improvements
+
+Reorganized extension preferences for better UX:
+
+1. **Reordered by priority** - Most-used settings at top
+2. **Added section titles** - "Multi-Vault Behavior", "Content Display", "Advanced"
+3. **Improved descriptions** - Clearer, more concise text
+4. **Moved rarely-used settings** - `configFileName` moved to bottom under "Advanced"
+
+---
+
 ## What's Next
 
 See [OPTIMIZATION_PLAN.md](./OPTIMIZATION_PLAN.md) for the full roadmap including:
-- Fix remaining bugs
-- Security audit
 - Publication to GitHub and Raycast Store
 
 ---
@@ -274,11 +353,12 @@ See [OPTIMIZATION_PLAN.md](./OPTIMIZATION_PLAN.md) for the full roadmap includin
 |------|-----------|
 | 2025-11-25 | Initial fork and Windows fixes |
 | 2025-11-25 | Lazy loading implementation |
-| 2025-11-25 | Image rendering support |
 | 2025-11-25 | Excalidraw handling |
 | 2025-11-25 | Performance research |
 | 2025-11-25 | Phase 1 optimizations complete |
 | 2025-11-25 | Phase 2 assessment - mostly complete |
-| TBD | Fix remaining bugs |
-| TBD | Security audit |
+| 2025-11-25 | Security audit complete |
+| 2025-11-25 | Active vault feature fully implemented |
+| 2025-11-25 | Image rendering fixed (base64 data URIs) |
+| 2025-11-25 | Settings interface reorganized |
 | TBD | Public release |
