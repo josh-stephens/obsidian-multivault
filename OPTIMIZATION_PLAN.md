@@ -1,7 +1,8 @@
 # Project Roadmap & Optimization Plan
 
 > Generated: 2025-11-25
-> Status: In Progress
+> Updated: 2025-11-25
+> Status: Phase 1 Complete, Phase 2 Mostly Complete, Ready for Security Audit
 
 ## Project Goals
 
@@ -51,11 +52,11 @@ This extension started as a fork of the original [obsidian-raycast](https://gith
 - [x] **1.6 Reduce MAX_RENDERED_NOTES** - 1000 → 100 items
 - [x] **1.7 Add perf.ts utility** - Toggle PERF_ENABLED for debugging
 
-### Phase 2: Structural Improvements
-- [ ] **2.1 Lazy Content Loading** - Two-phase search: title filter → content refinement
-- [ ] **2.2 Progressive Results** - Show title matches immediately, content in background
-- [ ] **2.3 Smarter Fuse.js Config** - Field weights, stricter threshold
-- [ ] **2.4 Index Content Excerpt** - First 5000 chars only
+### Phase 2: Structural Improvements [MOSTLY COMPLETE]
+- [x] **2.1 Lazy Content Loading** - Two-phase search implemented in `search.tsx` (title/path first, content only when <20 matches)
+- [~] **2.2 Progressive Results** - Title matches shown first; true async would need React Suspense (deferred)
+- [ ] **2.3 Smarter Fuse.js Config** - Field weights needed; also `filterNotesFuzzy()` has bug (content key added but notes have no content loaded)
+- [ ] **2.4 Index Content Excerpt** - First 5000 chars only (deferred - not critical)
 
 ### Phase 3: Advanced Optimizations (Optional)
 - [ ] **3.1 Switch to MiniSearch** - BM25 algorithm, better relevance
@@ -72,19 +73,19 @@ This extension started as a fork of the original [obsidian-raycast](https://gith
 
 ## Current Architecture Issues
 
-### 1. Initial Load Time
-- `getNotesFromCache()` loads ALL notes synchronously on vault selection
-- Cache only stores metadata (no pre-built search index)
-- 5-minute cache TTL means frequent re-reads from disk
+### 1. Initial Load Time [FIXED]
+- ~~`getNotesFromCache()` loads ALL notes synchronously on vault selection~~ Now loads metadata only
+- Cache stores metadata (no pre-built search index) - acceptable tradeoff
+- ~~5-minute cache TTL means frequent re-reads from disk~~ Now 30 minutes
 
-### 2. Search Performance
-- `filterNotes()` with `byContent=true` calls `getNoteContent()` for EVERY note on EVERY keystroke
-- Fuse.js re-indexes the entire collection on each search
-- No debouncing on search input (only `throttle={true}` on List)
+### 2. Search Performance [FIXED]
+- ~~`filterNotes()` with `byContent=true` calls `getNoteContent()` for EVERY note on EVERY keystroke~~ Now only when <20 title matches
+- Fuse.js re-indexes the entire collection on each search (acceptable for <1300 notes)
+- ~~No debouncing on search input~~ Now 150ms debounce
 
-### 3. Content Search
-- Loads full file content from disk during search filtering
-- No pre-built search index - linear scan of all content
+### 3. Content Search [IMPROVED]
+- Content loaded on-demand only when title search yields <20 results
+- No pre-built search index - but with lazy loading this is acceptable
 
 ---
 
