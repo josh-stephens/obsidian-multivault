@@ -22,7 +22,9 @@ export default function Command(props: { arguments: MediaSearchArguments }) {
       <SmartVaultSelection
         vaults={vaults}
         preferences={preferences}
-        target={(vault: Vault) => <MediaGrid vault={vault} searchArguments={props.arguments} />}
+        target={(vault: Vault) => (
+          <MediaGrid vault={vault} searchArguments={props.arguments} />
+        )}
       />
     );
   } else {

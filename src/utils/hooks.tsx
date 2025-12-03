@@ -6,14 +6,20 @@ import { sortByAlphabet } from "./utils";
 import fs from "fs";
 import { ObsidianVaultsState, Vault } from "../api/vault/vault.types";
 import { Note } from "../api/vault/notes/notes.types";
-import { loadMedia, loadObsidianJson, parseVaults } from "../api/vault/vault.service";
+import {
+  loadMedia,
+  loadObsidianJson,
+  parseVaults,
+} from "../api/vault/vault.service";
 import { getNotesFromCache } from "../api/cache/cache.service";
 import { Logger } from "../api/logger/logger.service";
 
 const logger = new Logger("Hooks");
 
 export const NotesContext = createContext([] as Note[]);
-export const NotesDispatchContext = createContext((() => {}) as (action: NoteReducerAction) => void);
+export const NotesDispatchContext = createContext((() => {}) as (
+  action: NoteReducerAction
+) => void);
 
 export function useNotes(vault: Vault, bookmarked = false) {
   /**
@@ -56,7 +62,9 @@ export function useMedia(vault: Vault) {
         try {
           await fs.promises.access(vault.path + "/.");
 
-          const media = loadMedia(vault).sort((m1, m2) => sortByAlphabet(m1.title, m2.title));
+          const media = loadMedia(vault).sort((m1, m2) =>
+            sortByAlphabet(m1.title, m2.title)
+          );
 
           setMedia({ ready: true, media });
         } catch (error) {

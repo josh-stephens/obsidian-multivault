@@ -23,7 +23,13 @@ interface SmartVaultSelectionProps {
  * - Provides a callback to switch vaults from within the target component
  */
 export function SmartVaultSelection(props: SmartVaultSelectionProps) {
-  const { vaults, target, preferences, allowAllVaults = false, onAllVaults } = props;
+  const {
+    vaults,
+    target,
+    preferences,
+    allowAllVaults = false,
+    onAllVaults,
+  } = props;
   const [defaultVault, setDefaultVault] = useState<EnhancedVault | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [shouldShowSelection, setShouldShowSelection] = useState(false);

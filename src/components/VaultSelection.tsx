@@ -8,7 +8,6 @@ import {
   sortVaults,
   getVaultDisplayName,
   toggleVaultFavorite,
-  saveVaultMetadata,
 } from "../utils/vault-config";
 import { setActiveVault, getActiveVaultKey } from "../utils/vault-context";
 
@@ -21,7 +20,13 @@ interface VaultSelectionProps {
 }
 
 export function VaultSelection(props: VaultSelectionProps) {
-  const { vaults, target, allowAllVaults = false, showMetadata = true, onAllVaults } = props;
+  const {
+    vaults,
+    target,
+    allowAllVaults = false,
+    showMetadata = true,
+    onAllVaults,
+  } = props;
   const [enhancedVaults, setEnhancedVaults] = useState<EnhancedVault[]>([]);
   const [activeVaultKey, setActiveVaultKey] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);

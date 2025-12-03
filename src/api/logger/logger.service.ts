@@ -30,26 +30,50 @@ export class Logger {
   }
 
   info(message: unknown): void {
-    console.log(`[${this.timestamp()}] [${this.name}] [INFO] ${this.formatMessage(message)}`);
+    console.log(
+      `[${this.timestamp()}] [${this.name}] [INFO] ${this.formatMessage(
+        message
+      )}`
+    );
   }
 
   success(message: unknown): void {
-    console.log(`[${this.timestamp()}] [${this.name}] [SUCCESS] ${this.formatMessage(message)}`);
+    console.log(
+      `[${this.timestamp()}] [${this.name}] [SUCCESS] ${this.formatMessage(
+        message
+      )}`
+    );
   }
 
   warning(message: unknown): void {
-    console.log(`[${this.timestamp()}] [${this.name}] [WARNING] ${this.formatMessage(message)}`);
+    console.log(
+      `[${this.timestamp()}] [${this.name}] [WARNING] ${this.formatMessage(
+        message
+      )}`
+    );
   }
 
   error(message: unknown): void {
-    console.log(`[${this.timestamp()}] [${this.name}] [ERROR] ${this.formatMessage(message)}`);
+    console.log(
+      `[${this.timestamp()}] [${this.name}] [ERROR] ${this.formatMessage(
+        message
+      )}`
+    );
   }
 
   debug(message: unknown): void {
-    console.log(`[${this.timestamp()}] [${this.name}] [DEBUG] ${this.formatMessage(message)}`);
+    console.log(
+      `[${this.timestamp()}] [${this.name}] [DEBUG] ${this.formatMessage(
+        message
+      )}`
+    );
   }
 
   trace(message: unknown): void {
-    console.log(`[${this.timestamp()}] [${this.name}] [TRACE] ${this.formatMessage(message)}`);
+    console.log(
+      `[${this.timestamp()}] [${this.name}] [TRACE] ${this.formatMessage(
+        message
+      )}`
+    );
   }
 }

@@ -34,7 +34,9 @@ export default function Command() {
       <SmartVaultSelection
         vaults={vaults}
         preferences={pref}
-        target={(vault: Vault) => <CreateNoteForm vault={vault} showTitle={vaults.length > 1} />}
+        target={(vault: Vault) => (
+          <CreateNoteForm vault={vault} showTitle={vaults.length > 1} />
+        )}
       />
     );
   } else {

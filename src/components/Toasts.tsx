@@ -9,7 +9,8 @@ import { Vault } from "../api/vault/vault.types";
 export function noVaultPathsToast() {
   showToast({
     title: "Path Error",
-    message: "Something went wrong with your vault path. There are no paths to select from.",
+    message:
+      "Something went wrong with your vault path. There are no paths to select from.",
     style: Toast.Style.Failure,
   });
 }

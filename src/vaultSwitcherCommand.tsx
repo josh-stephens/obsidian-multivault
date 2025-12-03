@@ -1,4 +1,12 @@
-import { List, ActionPanel, Action, Icon, Color, showToast, Toast, closeMainWindow } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  closeMainWindow,
+} from "@raycast/api";
 import { useObsidianVaults } from "./utils/hooks";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { useEffect, useState } from "react";
@@ -7,7 +15,6 @@ import {
   enhanceVaults,
   sortVaults,
   getVaultDisplayName,
-  getVaultAbbreviation,
 } from "./utils/vault-config";
 import { setActiveVault, getActiveVaultKey } from "./utils/vault-context";
 import { ShowVaultInFinderAction } from "./utils/actions";
@@ -51,7 +58,10 @@ export default function Command() {
 
   async function handleOpenVault(vault: EnhancedVault) {
     await setActiveVault(vault.key);
-    const target = getObsidianTarget({ type: ObsidianTargetType.OpenVault, vault });
+    const target = getObsidianTarget({
+      type: ObsidianTargetType.OpenVault,
+      vault,
+    });
     await open(target);
     await showToast({
       style: Toast.Style.Success,
@@ -82,9 +92,15 @@ export default function Command() {
       if (days === 0) {
         accessories.push({ text: "Today", tooltip: "Last accessed today" });
       } else if (days === 1) {
-        accessories.push({ text: "Yesterday", tooltip: "Last accessed yesterday" });
+        accessories.push({
+          text: "Yesterday",
+          tooltip: "Last accessed yesterday",
+        });
       } else if (days < 7) {
-        accessories.push({ text: `${days}d ago`, tooltip: `Last accessed ${days} days ago` });
+        accessories.push({
+          text: `${days}d ago`,
+          tooltip: `Last accessed ${days} days ago`,
+        });
       } else if (days < 30) {
         const weeks = Math.floor(days / 7);
         accessories.push({
@@ -122,7 +138,12 @@ export default function Command() {
   return (
     <List searchBarPlaceholder="Search vaults...">
       {favorites.length > 0 && (
-        <List.Section title="Favorites" subtitle={`${favorites.length} vault${favorites.length !== 1 ? "s" : ""}`}>
+        <List.Section
+          title="Favorites"
+          subtitle={`${favorites.length} vault${
+            favorites.length !== 1 ? "s" : ""
+          }`}
+        >
           {favorites.map((vault) => (
             <List.Item
               key={vault.key}
@@ -161,7 +182,10 @@ export default function Command() {
       )}
 
       {others.length > 0 && (
-        <List.Section title={favorites.length > 0 ? "Other Vaults" : "All Vaults"} subtitle={`${others.length} vault${others.length !== 1 ? "s" : ""}`}>
+        <List.Section
+          title={favorites.length > 0 ? "Other Vaults" : "All Vaults"}
+          subtitle={`${others.length} vault${others.length !== 1 ? "s" : ""}`}
+        >
           {others.map((vault) => (
             <List.Item
               key={vault.key}

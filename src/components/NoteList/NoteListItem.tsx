@@ -2,7 +2,13 @@ import { List, ActionPanel } from "@raycast/api";
 import React, { useMemo } from "react";
 import fs from "fs";
 
-import { readingTime, wordCount, trimPathToMaxLength, createdDateFor, fileSizeFor } from "../../utils/utils";
+import {
+  readingTime,
+  wordCount,
+  trimPathToMaxLength,
+  createdDateFor,
+  fileSizeFor,
+} from "../../utils/utils";
 import { yamlPropertyForString } from "../../utils/yaml";
 import { SearchNotePreferences } from "../../utils/preferences";
 import { Note } from "../../api/vault/notes/notes.types";
@@ -50,7 +56,9 @@ export function NoteListItem(props: {
   function Link() {
     const url = yamlPropertyForString(content, "url");
     if (url) {
-      return <List.Item.Detail.Metadata.Link target={url} text="View" title="URL" />;
+      return (
+        <List.Item.Detail.Metadata.Link target={url} text="View" title="URL" />
+      );
     } else {
       return null;
     }
@@ -74,8 +82,14 @@ export function NoteListItem(props: {
           metadata={
             pref.showMetadata ? (
               <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label title="Character Count" text={content.length.toString()} />
-                <List.Item.Detail.Metadata.Label title="Word Count" text={wordCount(content).toString()} />
+                <List.Item.Detail.Metadata.Label
+                  title="Character Count"
+                  text={content.length.toString()}
+                />
+                <List.Item.Detail.Metadata.Label
+                  title="Word Count"
+                  text={wordCount(content).toString()}
+                />
                 <List.Item.Detail.Metadata.Label
                   title="Reading Time"
                   text={readingTime(content).toString() + " min read"}
@@ -87,7 +101,10 @@ export function NoteListItem(props: {
                   title="Creation Date"
                   text={createdDateFor(note).toLocaleDateString()}
                 />
-                <List.Item.Detail.Metadata.Label title="File Size" text={fileSizeFor(note).toFixed(2) + " KB"} />
+                <List.Item.Detail.Metadata.Label
+                  title="File Size"
+                  text={fileSizeFor(note).toFixed(2) + " KB"}
+                />
                 <List.Item.Detail.Metadata.Label
                   title="Note Path"
                   text={trimPathToMaxLength(note.path.split(vault.path)[1], 55)}

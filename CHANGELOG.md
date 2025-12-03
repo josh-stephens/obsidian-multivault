@@ -1,4 +1,42 @@
-# Obsidian Changelog
+# Obsidian Multi-vault Changelog
+
+## [Multi-vault Fork] - 2025-12-03
+
+This is a fork of the original [obsidian-raycast](https://github.com/marcjulianschwarz/obsidian-raycast) extension with substantial new features.
+
+### New Features
+- **Multi-Vault Management** - Customize display names, emojis, abbreviations, and colors for each vault
+- **Active Vault** - Set a default vault and skip the vault picker (Cmd+Shift+V to switch)
+- **Vault Favorites** - Mark vaults as favorites for priority sorting
+- **Recent Notes Command** - View recently modified notes across all vaults with time filters (24h/7d/30d)
+- **Vault Switcher Command** - Rapidly switch between vaults with keyboard shortcuts
+- **Cross-Vault Search** - Search notes across all vaults simultaneously
+- **Vault Indicators** - Visual badges showing which vault each note belongs to
+
+### Performance Improvements
+- **Lazy Loading** - Notes load metadata only; content loaded on demand
+- **Memory Optimized** - Handles vaults with 1000+ notes without crashing (fixes JS heap out of memory)
+- **Fast Tag Extraction** - Tags extracted from first 2KB of files (4200x faster than before)
+- **Two-Phase Search** - Title/path search first, content search only when needed
+- **150ms Search Debouncing** - Prevents excessive re-renders while typing
+
+### Windows & Cross-Platform
+- Raycast Windows beta compatibility (`raycast-x` config path)
+- Cross-platform Obsidian config detection (Windows/macOS/Linux)
+- Proper handling of quoted vault paths
+
+### Enhanced Rendering
+- **Image Attachments** - Obsidian `![[image.jpg]]` syntax supported (external URLs render; local images show placeholders)
+- **Excalidraw Support** - Drawing files show friendly message instead of raw JSON
+
+### Security Fixes
+- Path traversal protection in note creation
+- Path traversal protection in image resolution
+- JSON parse error handling in bookmarks
+
+---
+
+## Previous Changelog (from original extension)
 
 ## [Bug fixes] - 2025-06-10
 

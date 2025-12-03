@@ -3,7 +3,7 @@ export type Note = {
   path: string;
   lastModified: Date;
   tags: string[];
-  content: string;  // Lazily loaded - may be empty string initially
+  content: string; // Lazily loaded - may be empty string initially
   bookmarked: boolean;
 };
 

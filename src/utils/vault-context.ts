@@ -1,6 +1,10 @@
 import { LocalStorage } from "@raycast/api";
 import { Vault } from "../api/vault/vault.types";
-import { EnhancedVault, enhanceVault, updateLastAccessed as updateVaultLastAccessed } from "./vault-config";
+import {
+  EnhancedVault,
+  enhanceVault,
+  updateLastAccessed as updateVaultLastAccessed,
+} from "./vault-config";
 
 const ACTIVE_VAULT_KEY = "active-vault-key";
 
@@ -38,7 +42,9 @@ export async function clearActiveVault(): Promise<void> {
  * Get the active vault from a list of vaults
  * Returns null if no active vault is set or if the active vault is not in the list
  */
-export async function getActiveVault(vaults: Vault[]): Promise<EnhancedVault | null> {
+export async function getActiveVault(
+  vaults: Vault[]
+): Promise<EnhancedVault | null> {
   const activeKey = await getActiveVaultKey();
   if (!activeKey) {
     return null;
@@ -61,7 +67,9 @@ export async function getActiveVault(vaults: Vault[]): Promise<EnhancedVault | n
  * 2. Most recently accessed favorite vault
  * 3. First vault in the list
  */
-export async function getDefaultVault(vaults: Vault[]): Promise<EnhancedVault | null> {
+export async function getDefaultVault(
+  vaults: Vault[]
+): Promise<EnhancedVault | null> {
   if (vaults.length === 0) {
     return null;
   }

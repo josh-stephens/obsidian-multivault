@@ -34,7 +34,8 @@ export const LATEX_REGEX = /\$\$(.|\n)*?\$\$/gm;
 export const LATEX_INLINE_REGEX = /\$(.|\n)*?\$/gm;
 export const CODE_BLOCK_REGEX = /```(.*)\n([\s\S]*?)```/gm;
 // Matches Obsidian image embeds: ![[image.jpg]], ![[image.jpg|alt text]], ![[folder/image.png]]
-export const OBSIDIAN_IMAGE_EMBED_REGEX = /!\[\[([^\]|]+(?:\.(jpg|jpeg|png|gif|webp|svg|bmp)))(?:\|([^\]]*))?\]\]/gi;
+export const OBSIDIAN_IMAGE_EMBED_REGEX =
+  /!\[\[([^\]|]+(?:\.(jpg|jpeg|png|gif|webp|svg|bmp)))(?:\|([^\]]*))?\]\]/gi;
 // Matches Obsidian wikilinks (non-image): [[Note Name]] or [[Note Name|alias]]
 export const OBSIDIAN_WIKILINK_REGEX = /\[\[([^\]|]+)(?:\|([^\]]*))?\]\]/g;
 

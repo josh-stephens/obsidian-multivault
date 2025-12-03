@@ -1,4 +1,13 @@
-import { List, ActionPanel, Action, Icon, Color, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  Color,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useObsidianVaults } from "./utils/hooks";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { useEffect, useState } from "react";
@@ -12,15 +21,23 @@ import {
   toggleVaultFavorite,
   VaultMetadata,
 } from "./utils/vault-config";
-import { setActiveVault, getActiveVaultKey, clearActiveVault } from "./utils/vault-context";
+import {
+  setActiveVault,
+  getActiveVaultKey,
+  clearActiveVault,
+} from "./utils/vault-context";
 import { ShowVaultInFinderAction } from "./utils/actions";
 import { Form } from "@raycast/api";
 
 function EditVaultForm(props: { vault: EnhancedVault; onSave: () => void }) {
   const { vault, onSave } = props;
   const { pop } = useNavigation();
-  const [displayName, setDisplayName] = useState(vault.metadata.displayName || "");
-  const [abbreviation, setAbbreviation] = useState(vault.metadata.abbreviation || "");
+  const [displayName, setDisplayName] = useState(
+    vault.metadata.displayName || ""
+  );
+  const [abbreviation, setAbbreviation] = useState(
+    vault.metadata.abbreviation || ""
+  );
   const [emoji, setEmoji] = useState(vault.metadata.emoji || "");
   const [color, setColor] = useState(vault.metadata.color || Color.Blue);
 
@@ -212,7 +229,10 @@ export default function Command() {
 
   return (
     <List>
-      <List.Section title="Vaults" subtitle={`${vaults.length} vault${vaults.length !== 1 ? "s" : ""}`}>
+      <List.Section
+        title="Vaults"
+        subtitle={`${vaults.length} vault${vaults.length !== 1 ? "s" : ""}`}
+      >
         {enhancedVaults.map((vault) => (
           <List.Item
             key={vault.key}
@@ -232,8 +252,14 @@ export default function Command() {
                   target={<EditVaultForm vault={vault} onSave={loadVaults} />}
                 />
                 <Action
-                  title={vault.metadata.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
-                  icon={vault.metadata.isFavorite ? Icon.StarDisabled : Icon.Star}
+                  title={
+                    vault.metadata.isFavorite
+                      ? "Remove from Favorites"
+                      : "Add to Favorites"
+                  }
+                  icon={
+                    vault.metadata.isFavorite ? Icon.StarDisabled : Icon.Star
+                  }
                   shortcut={{ modifiers: ["cmd"], key: "f" }}
                   onAction={() => handleToggleFavorite(vault.key)}
                 />

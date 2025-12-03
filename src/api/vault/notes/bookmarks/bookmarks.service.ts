@@ -9,16 +9,21 @@ import { Logger } from "../../../logger/logger.service";
 const logger = new Logger("Bookmarks");
 
 /** Flattens BookmarkEntry groups down to simple bookmark entries without groups */
-function* flattenBookmarks(bookmarkEntries: BookmarkEntry[]): Generator<BookmarkFile> {
+function* flattenBookmarks(
+  bookmarkEntries: BookmarkEntry[]
+): Generator<BookmarkFile> {
   for (const item of bookmarkEntries) {
     if (item.type === "file") yield item;
-    if (item.type === "group" && item.items) yield* flattenBookmarks(item.items);
+    if (item.type === "group" && item.items)
+      yield* flattenBookmarks(item.items);
   }
 }
 
 function getBookmarksJson(vault: Vault): BookMarkJson | undefined {
   const { configFileName } = getPreferenceValues();
-  const bookmarksJsonPath = `${vault.path}/${configFileName || ".obsidian"}/bookmarks.json`;
+  const bookmarksJsonPath = `${vault.path}/${
+    configFileName || ".obsidian"
+  }/bookmarks.json`;
   if (!fs.existsSync(bookmarksJsonPath)) {
     logger.warning("No bookmarks JSON found");
     return;
@@ -36,7 +41,9 @@ function getBookmarksJson(vault: Vault): BookMarkJson | undefined {
 
 function writeBookmarksJson(vault: Vault, bookmarksJson: BookMarkJson) {
   const { configFileName } = getPreferenceValues();
-  const bookmarksJsonPath = `${vault.path}/${configFileName || ".obsidian"}/bookmarks.json`;
+  const bookmarksJsonPath = `${vault.path}/${
+    configFileName || ".obsidian"
+  }/bookmarks.json`;
   fs.writeFileSync(bookmarksJsonPath, JSON.stringify(bookmarksJson, null, 2));
 }
 

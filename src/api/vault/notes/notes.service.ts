@@ -1,27 +1,53 @@
-import { confirmAlert, getPreferenceValues, getSelectedText, Icon, open, showToast, Toast } from "@raycast/api";
-import { NoteFormPreferences, SearchNotePreferences } from "../../../utils/preferences";
+import {
+  confirmAlert,
+  getPreferenceValues,
+  getSelectedText,
+  Icon,
+  open,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import {
+  NoteFormPreferences,
+  SearchNotePreferences,
+} from "../../../utils/preferences";
 import fs from "fs";
 import { CodeBlock, CreateNoteParams, Note } from "./notes.types";
 import { Vault } from "../vault.types";
 import path from "path";
-import { directoryCreationErrorToast, fileWriteErrorToast } from "../../../components/Toasts";
+import {
+  directoryCreationErrorToast,
+  fileWriteErrorToast,
+} from "../../../components/Toasts";
 import { CODE_BLOCK_REGEX } from "../../../utils/constants";
 import { applyTemplates } from "../../templating/templating.service";
 
 export async function appendSelectedTextTo(note: Note) {
   let { appendSelectedTemplate } = getPreferenceValues<SearchNotePreferences>();
 
-  appendSelectedTemplate = appendSelectedTemplate ? appendSelectedTemplate : "{content}";
+  appendSelectedTemplate = appendSelectedTemplate
+    ? appendSelectedTemplate
+    : "{content}";
 
   try {
     const selectedText = await getSelectedText();
     if (selectedText.trim() == "") {
-      showToast({ title: "No text selected", message: "Make sure to select some text.", style: Toast.Style.Failure });
+      showToast({
+        title: "No text selected",
+        message: "Make sure to select some text.",
+        style: Toast.Style.Failure,
+      });
     } else {
-      let content = appendSelectedTemplate.replaceAll("{content}", selectedText);
+      let content = appendSelectedTemplate.replaceAll(
+        "{content}",
+        selectedText
+      );
       content = await applyTemplates(content);
       fs.appendFileSync(note.path, "\n" + content);
-      showToast({ title: "Added selected text to note", style: Toast.Style.Success });
+      showToast({
+        title: "Added selected text to note",
+        style: Toast.Style.Success,
+      });
       return true;
     }
   } catch {
@@ -70,7 +96,9 @@ export async function createNote(vault: Vault, params: CreateNoteParams) {
   const saved = await saveStringToDisk(vault.path, content, name, params.path);
 
   if (pref.openOnCreate) {
-    const target = "obsidian://open?path=" + encodeURIComponent(path.join(vault.path, params.path, name + ".md"));
+    const target =
+      "obsidian://open?path=" +
+      encodeURIComponent(path.join(vault.path, params.path, name + ".md"));
     if (saved) {
       setTimeout(() => {
         open(target);
@@ -100,7 +128,10 @@ function createObsidianProperties(tags: string[]): string {
 function isPathWithinDirectory(filePath: string, directory: string): boolean {
   const resolvedPath = path.resolve(filePath);
   const resolvedDirectory = path.resolve(directory);
-  return resolvedPath.startsWith(resolvedDirectory + path.sep) || resolvedPath === resolvedDirectory;
+  return (
+    resolvedPath.startsWith(resolvedDirectory + path.sep) ||
+    resolvedPath === resolvedDirectory
+  );
 }
 
 /**
@@ -110,10 +141,17 @@ function isPathWithinDirectory(filePath: string, directory: string): boolean {
  * @param name - The name of the note
  * @returns - True if the note was saved successfully
  */
-async function saveStringToDisk(vaultPath: string, content: string, name: string, notePath: string) {
+async function saveStringToDisk(
+  vaultPath: string,
+  content: string,
+  name: string,
+  notePath: string
+) {
   // Sanitize inputs to prevent path traversal
-  const sanitizedNotePath = notePath.replace(/\.\.[\/\\]/g, "");
-  const sanitizedName = name.replace(/\.\.[\/\\]/g, "").replace(/[<>:"|?*]/g, "_");
+  const sanitizedNotePath = notePath.replace(/\.\.[/\\]/g, "");
+  const sanitizedName = name
+    .replace(/\.\.[/\\]/g, "")
+    .replace(/[<>:"|?*]/g, "_");
   const fullPath = path.join(vaultPath, sanitizedNotePath);
 
   // Validate that the resolved path is within the vault
@@ -130,7 +168,10 @@ async function saveStringToDisk(vaultPath: string, content: string, name: string
     if (
       await confirmAlert({
         title: "Override note",
-        message: 'Are you sure you want to override the note: "' + sanitizedName + '"?',
+        message:
+          'Are you sure you want to override the note: "' +
+          sanitizedName +
+          '"?',
         icon: Icon.ExclamationMark,
       })
     ) {
@@ -145,7 +186,11 @@ async function saveStringToDisk(vaultPath: string, content: string, name: string
 }
 
 /** Writes a text to a markdown file at filePath with a given fileName. */
-function writeTextToMarkdownFile(filePath: string, fileName: string, text: string) {
+function writeTextToMarkdownFile(
+  filePath: string,
+  fileName: string,
+  text: string
+) {
   try {
     fs.mkdirSync(filePath, { recursive: true });
   } catch {

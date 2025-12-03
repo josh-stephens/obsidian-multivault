@@ -8,26 +8,26 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 type ExtensionPreferences = {
-  /** Path to Vault - Specify the path or multiple paths (comma separated) to your vault/vaults */
+  /** Path to Vault - Specify the path or multiple paths (comma separated) to your vault/vaults. Leave empty to auto-detect from Obsidian. */
   "vaultPath"?: string,
-  /** Config filename - Override the vault config filename (default: .obsidian) */
-  "configFileName": string,
-  /** Exclude following folders - Specify which folders to exclude (comma separated) */
-  "excludedFolders"?: string,
-  /** Remove content - Hide YAML frontmatter for copying and viewing notes */
-  "removeYAML"?: boolean,
-  /** undefined - Hide LaTeX (surrounded by $$ or $) for copying and viewing notes */
-  "removeLatex"?: boolean,
-  /** undefined - Hide links for copying and viewing notes */
-  "removeLinks"?: boolean,
-  /** undefined - Automatically use the active vault instead of showing vault selection */
+  /** Multi-Vault Behavior - Go directly to your active vault instead of showing vault picker. Use Cmd+Shift+V to switch vaults. */
   "useActiveVaultAsDefault": boolean,
-  /** undefined - Display vault name/badge in search results for cross-vault operations */
+  /** Excluded Folders - Folders to exclude from search results (comma separated) */
+  "excludedFolders"?: string,
+  /** undefined - Display vault name/badge in search results when using multiple vaults */
   "showVaultIndicatorsInResults": boolean,
   /** Vault Indicator Style - How to display vault indicators in results */
   "vaultIndicatorStyle": "badge" | "subtitle" | "both",
-  /** undefined - Allow searching across all vaults simultaneously */
-  "crossVaultSearchEnabled": boolean
+  /** undefined - Search all vaults at once in Recent Notes command */
+  "crossVaultSearchEnabled": boolean,
+  /** Content Display - Hide YAML frontmatter when viewing and copying notes */
+  "removeYAML"?: boolean,
+  /** undefined - Hide LaTeX (surrounded by $$ or $) when viewing and copying notes */
+  "removeLatex"?: boolean,
+  /** undefined - Hide [[wikilinks]] when viewing and copying notes */
+  "removeLinks"?: boolean,
+  /** Advanced - Override vault config folder name (default: .obsidian). Only change if using custom config. */
+  "configFileName": string
 }
 
 /** Preferences accessible in all the extension's commands */

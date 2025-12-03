@@ -4,7 +4,10 @@ import { useNotesContext, useNotesDispatchContext } from "../../utils/hooks";
 import { SearchArguments } from "../../utils/interfaces";
 import { NoteReducerActionType } from "../../utils/reducers";
 
-export function NoteListDropdown(props: { tags: string[]; searchArguments: SearchArguments }) {
+export function NoteListDropdown(props: {
+  tags: string[];
+  searchArguments: SearchArguments;
+}) {
   const allNotes = useNotesContext();
   const dispatch = useNotesDispatchContext();
   const { tags, searchArguments } = props;
@@ -39,7 +42,11 @@ export function NoteListDropdown(props: { tags: string[]; searchArguments: Searc
   }
 
   return (
-    <List.Dropdown tooltip="Search For" value={selectedTag} onChange={handleChange}>
+    <List.Dropdown
+      tooltip="Search For"
+      value={selectedTag}
+      onChange={handleChange}
+    >
       <List.Dropdown.Item title="All" value="all" />
       <List.Dropdown.Section title="Tags" />
       {tags.map((tag: string) => (

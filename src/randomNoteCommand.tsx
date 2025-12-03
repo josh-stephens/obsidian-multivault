@@ -21,7 +21,9 @@ export default function Command() {
       <SmartVaultSelection
         vaults={vaults}
         preferences={preferences}
-        target={(vault: Vault) => <RandomNote vault={vault} showTitle={vaults.length > 1} />}
+        target={(vault: Vault) => (
+          <RandomNote vault={vault} showTitle={vaults.length > 1} />
+        )}
       />
     );
   } else {

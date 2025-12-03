@@ -1,18 +1,19 @@
 import { List, Color } from "@raycast/api";
-import { EnhancedVault, getVaultDisplayName, getVaultAbbreviation } from "../utils/vault-config";
+import {
+  EnhancedVault,
+  getVaultDisplayName,
+  getVaultAbbreviation,
+} from "../utils/vault-config";
 import { GlobalPreferences } from "../utils/preferences";
 
 export type VaultIndicatorStyle = "badge" | "subtitle" | "both" | "none";
 
-interface VaultIndicatorProps {
-  vault: EnhancedVault;
-  style?: VaultIndicatorStyle;
-}
-
 /**
  * Get vault indicator as accessory (badge)
  */
-export function getVaultBadgeAccessory(vault: EnhancedVault): List.Item.Accessory {
+export function getVaultBadgeAccessory(
+  vault: EnhancedVault
+): List.Item.Accessory {
   const abbreviation = getVaultAbbreviation(vault);
   const color = vault.metadata.color || Color.SecondaryText;
 
@@ -54,12 +55,16 @@ export function getVaultIndicators(
       break;
 
     case "subtitle":
-      subtitle = subtitle ? `${getVaultSubtitle(vault)} • ${subtitle}` : getVaultSubtitle(vault);
+      subtitle = subtitle
+        ? `${getVaultSubtitle(vault)} • ${subtitle}`
+        : getVaultSubtitle(vault);
       break;
 
     case "both":
       accessories.unshift(getVaultBadgeAccessory(vault));
-      subtitle = subtitle ? `${getVaultSubtitle(vault)} • ${subtitle}` : getVaultSubtitle(vault);
+      subtitle = subtitle
+        ? `${getVaultSubtitle(vault)} • ${subtitle}`
+        : getVaultSubtitle(vault);
       break;
 
     case "none":
@@ -77,7 +82,9 @@ export function getVaultIndicators(
 /**
  * Hook to get vault indicator style from preferences
  */
-export function useVaultIndicatorStyle(preferences: GlobalPreferences): VaultIndicatorStyle {
+export function useVaultIndicatorStyle(
+  preferences: GlobalPreferences
+): VaultIndicatorStyle {
   if (!preferences.showVaultIndicatorsInResults) {
     return "none";
   }

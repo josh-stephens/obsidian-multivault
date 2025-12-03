@@ -1,7 +1,10 @@
 import { DateTime } from "luxon";
 import { Clipboard } from "@raycast/api";
 import { getSelectedTextContent, ISO8601_week_no } from "../../utils/utils";
-import { DAY_NUMBER_TO_STRING, MONTH_NUMBER_TO_STRING } from "../../utils/constants";
+import {
+  DAY_NUMBER_TO_STRING,
+  MONTH_NUMBER_TO_STRING,
+} from "../../utils/constants";
 
 /** both content and template might have templates to apply */
 export async function applyTemplates(content: string, template = "") {

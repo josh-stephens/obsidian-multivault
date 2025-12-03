@@ -1,14 +1,28 @@
-import { List, ActionPanel, Action, Icon, Color, getPreferenceValues } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  Color,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useObsidianVaults } from "./utils/hooks";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { useEffect, useState } from "react";
-import { EnhancedVault, enhanceVaults, getVaultDisplayName } from "./utils/vault-config";
+import {
+  EnhancedVault,
+  enhanceVaults,
+  getVaultDisplayName,
+} from "./utils/vault-config";
 import { loadNotes } from "./api/vault/vault.service";
 import { Note } from "./api/vault/notes/notes.types";
 import { NoteQuickLook } from "./components/NoteQuickLook";
 import { NoteActions } from "./utils/actions";
 import { GlobalPreferences } from "./utils/preferences";
-import { getVaultIndicators, useVaultIndicatorStyle } from "./components/VaultIndicator";
+import {
+  getVaultIndicators,
+  useVaultIndicatorStyle,
+} from "./components/VaultIndicator";
 import { setActiveVault } from "./utils/vault-context";
 
 interface NoteWithVault {
@@ -58,7 +72,9 @@ export default function Command() {
       }
 
       // Sort by last modified (most recent first)
-      allNotes.sort((a, b) => b.note.lastModified.getTime() - a.note.lastModified.getTime());
+      allNotes.sort(
+        (a, b) => b.note.lastModified.getTime() - a.note.lastModified.getTime()
+      );
 
       setNotesWithVaults(allNotes);
       setFilteredNotes(filterNotesByTime(allNotes, timeFilter));
@@ -72,7 +88,10 @@ export default function Command() {
     setFilteredNotes(filterNotesByTime(notesWithVaults, timeFilter));
   }, [timeFilter, notesWithVaults]);
 
-  function filterNotesByTime(notes: NoteWithVault[], filter: TimeFilter): NoteWithVault[] {
+  function filterNotesByTime(
+    notes: NoteWithVault[],
+    filter: TimeFilter
+  ): NoteWithVault[] {
     if (filter === "all") {
       return notes;
     }
@@ -159,7 +178,9 @@ export default function Command() {
     );
 
     // Get all notes for this vault for NoteActions
-    const vaultNotes = filteredNotes.filter((nv) => nv.vault.key === vault.key).map((nv) => nv.note);
+    const vaultNotes = filteredNotes
+      .filter((nv) => nv.vault.key === vault.key)
+      .map((nv) => nv.note);
 
     return (
       <List.Item
@@ -174,7 +195,14 @@ export default function Command() {
               <Action.Push
                 title="Quick Look"
                 icon={Icon.Eye}
-                target={<NoteQuickLook note={note} vault={vault} showTitle={true} allNotes={vaultNotes} />}
+                target={
+                  <NoteQuickLook
+                    note={note}
+                    vault={vault}
+                    showTitle={true}
+                    allNotes={vaultNotes}
+                  />
+                }
               />
               <NoteActions note={note} notes={vaultNotes} vault={vault} />
             </ActionPanel.Section>
@@ -199,7 +227,9 @@ export default function Command() {
   }
 
   if (!ready || isLoading) {
-    return <List isLoading={true} searchBarAccessory={getTimeFilterDropdown()} />;
+    return (
+      <List isLoading={true} searchBarAccessory={getTimeFilterDropdown()} />
+    );
   }
 
   if (vaults.length === 0) {
@@ -219,7 +249,10 @@ export default function Command() {
     }
 
     return (
-      <List searchBarPlaceholder="Search recent notes..." searchBarAccessory={getTimeFilterDropdown()}>
+      <List
+        searchBarPlaceholder="Search recent notes..."
+        searchBarAccessory={getTimeFilterDropdown()}
+      >
         {Array.from(notesByVault.entries()).map(([vaultKey, notes]) => {
           const vault = enhancedVaults.find((v) => v.key === vaultKey);
           if (!vault) return null;
@@ -246,7 +279,9 @@ export default function Command() {
     >
       <List.Section
         title="Recent Notes"
-        subtitle={`${filteredNotes.length} note${filteredNotes.length !== 1 ? "s" : ""}`}
+        subtitle={`${filteredNotes.length} note${
+          filteredNotes.length !== 1 ? "s" : ""
+        }`}
       >
         {filteredNotes.map((nv) => renderNoteItem(nv))}
       </List.Section>

@@ -25,7 +25,6 @@ export interface EnhancedVault extends Vault {
 
 // LocalStorage keys
 const VAULT_METADATA_PREFIX = "vault-metadata-";
-const ACTIVE_VAULT_KEY = "active-vault-key";
 const CONFIG_VERSION_KEY = "vault-config-version";
 const CURRENT_CONFIG_VERSION = "1.0";
 
@@ -73,7 +72,9 @@ export async function loadVaultMetadata(vault: Vault): Promise<VaultMetadata> {
 /**
  * Save metadata for a specific vault
  */
-export async function saveVaultMetadata(metadata: VaultMetadata): Promise<void> {
+export async function saveVaultMetadata(
+  metadata: VaultMetadata
+): Promise<void> {
   const key = getVaultMetadataKey(metadata.key);
   await LocalStorage.setItem(key, JSON.stringify(metadata));
 }
@@ -91,7 +92,10 @@ export async function updateLastAccessed(vaultKey: string): Promise<void> {
       metadata.lastAccessed = new Date().toISOString();
       await LocalStorage.setItem(key, JSON.stringify(metadata));
     } catch (error) {
-      console.error(`Failed to update last accessed for vault ${vaultKey}:`, error);
+      console.error(
+        `Failed to update last accessed for vault ${vaultKey}:`,
+        error
+      );
     }
   } else {
     // Create new metadata with current timestamp
@@ -214,7 +218,9 @@ export async function deleteVaultMetadata(vaultKey: string): Promise<void> {
 /**
  * Get all favorite vaults
  */
-export async function getFavoriteVaults(vaults: Vault[]): Promise<EnhancedVault[]> {
+export async function getFavoriteVaults(
+  vaults: Vault[]
+): Promise<EnhancedVault[]> {
   const enhanced = await enhanceVaults(vaults);
   return enhanced.filter((v) => v.metadata.isFavorite);
 }
@@ -222,7 +228,9 @@ export async function getFavoriteVaults(vaults: Vault[]): Promise<EnhancedVault[
 /**
  * Assign hotkey index to favorite vaults (1-5)
  */
-export async function assignHotkeyIndexes(vaults: EnhancedVault[]): Promise<void> {
+export async function assignHotkeyIndexes(
+  vaults: EnhancedVault[]
+): Promise<void> {
   const favorites = sortVaults(vaults.filter((v) => v.metadata.isFavorite));
 
   for (let i = 0; i < Math.min(favorites.length, 5); i++) {

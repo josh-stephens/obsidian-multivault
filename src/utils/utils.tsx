@@ -103,7 +103,12 @@ export type ObsidianTarget =
       prepend?: boolean;
       silent?: boolean;
     }
-  | { type: ObsidianTargetType.NewNote; vault: Vault; name: string; content?: string }
+  | {
+      type: ObsidianTargetType.NewNote;
+      vault: Vault;
+      name: string;
+      content?: string;
+    }
   | {
       type: ObsidianTargetType.AppendTask;
       vault: Vault;
@@ -116,16 +121,22 @@ export type ObsidianTarget =
 export function getObsidianTarget(target: ObsidianTarget) {
   switch (target.type) {
     case ObsidianTargetType.OpenVault: {
-      return ObsidianTargetType.OpenVault + encodeURIComponent(target.vault.name);
+      return (
+        ObsidianTargetType.OpenVault + encodeURIComponent(target.vault.name)
+      );
     }
     case ObsidianTargetType.OpenPath: {
       return ObsidianTargetType.OpenPath + encodeURIComponent(target.path);
     }
     case ObsidianTargetType.DailyNote: {
-      return ObsidianTargetType.DailyNote + encodeURIComponent(target.vault.name);
+      return (
+        ObsidianTargetType.DailyNote + encodeURIComponent(target.vault.name)
+      );
     }
     case ObsidianTargetType.DailyNoteAppend: {
-      const headingParam = target.heading ? "&heading=" + encodeURIComponent(target.heading) : "";
+      const headingParam = target.heading
+        ? "&heading=" + encodeURIComponent(target.heading)
+        : "";
       return (
         ObsidianTargetType.DailyNoteAppend +
         (target.prepend ? "&mode=prepend" : "&mode=append") +
@@ -148,7 +159,9 @@ export function getObsidianTarget(target: ObsidianTarget) {
       );
     }
     case ObsidianTargetType.AppendTask: {
-      const headingParam = target.heading ? "&heading=" + encodeURIComponent(target.heading) : "";
+      const headingParam = target.heading
+        ? "&heading=" + encodeURIComponent(target.heading)
+        : "";
       return (
         ObsidianTargetType.AppendTask +
         encodeURIComponent(target.path) +

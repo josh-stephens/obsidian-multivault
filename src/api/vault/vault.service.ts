@@ -4,9 +4,18 @@ import { readFile } from "fs/promises";
 import { homedir } from "os";
 import path from "path";
 import { performance } from "perf_hooks";
-import { AUDIO_FILE_EXTENSIONS, LATEX_INLINE_REGEX, LATEX_REGEX, OBSIDIAN_IMAGE_EMBED_REGEX, VIDEO_FILE_EXTENSIONS } from "../../utils/constants";
+import {
+  AUDIO_FILE_EXTENSIONS,
+  LATEX_INLINE_REGEX,
+  LATEX_REGEX,
+  OBSIDIAN_IMAGE_EMBED_REGEX,
+  VIDEO_FILE_EXTENSIONS,
+} from "../../utils/constants";
 import { Media } from "../../utils/interfaces";
-import { GlobalPreferences, SearchNotePreferences } from "../../utils/preferences";
+import {
+  GlobalPreferences,
+  SearchNotePreferences,
+} from "../../utils/preferences";
 import { tagsForString } from "../../utils/yaml";
 import { getBookmarkedNotePaths } from "./notes/bookmarks/bookmarks.service";
 import { Note } from "./notes/notes.types";
@@ -97,7 +106,7 @@ export function parseVaults(): Vault[] {
     .map((vaultPath) => ({
       name: getVaultNameFromPath(vaultPath),
       key: vaultPath,
-      path: vaultPath
+      path: vaultPath,
     }));
 }
 
@@ -112,10 +121,17 @@ function getObsidianConfigPath(): string {
 
   if (platform === "darwin") {
     // macOS
-    return path.join(homedir(), "Library", "Application Support", "obsidian", "obsidian.json");
+    return path.join(
+      homedir(),
+      "Library",
+      "Application Support",
+      "obsidian",
+      "obsidian.json"
+    );
   } else if (platform === "win32") {
     // Windows - use APPDATA environment variable
-    const appData = process.env.APPDATA || path.join(homedir(), "AppData", "Roaming");
+    const appData =
+      process.env.APPDATA || path.join(homedir(), "AppData", "Roaming");
     return path.join(appData, "obsidian", "obsidian.json");
   } else {
     // Linux and others
@@ -126,7 +142,9 @@ function getObsidianConfigPath(): string {
 export async function loadObsidianJson(): Promise<Vault[]> {
   const obsidianJsonPath = path.resolve(getObsidianConfigPath());
   try {
-    const obsidianJson = JSON.parse(await readFile(obsidianJsonPath, "utf8")) as ObsidianJSON;
+    const obsidianJson = JSON.parse(
+      await readFile(obsidianJsonPath, "utf8")
+    ) as ObsidianJSON;
     return Object.values(obsidianJson.vaults).map(({ path: vaultPath }) => ({
       name: getVaultNameFromPath(vaultPath),
       key: vaultPath,
@@ -150,13 +168,27 @@ function isPathExcluded(pathToCheck: string, excludedPaths: string[]) {
     const normalizedExcluded = path.normalize(excluded);
 
     // Check if the path is exactly the excluded path or is a subfolder
-    return normalizedPath === normalizedExcluded || normalizedPath.startsWith(normalizedExcluded + path.sep);
+    return (
+      normalizedPath === normalizedExcluded ||
+      normalizedPath.startsWith(normalizedExcluded + path.sep)
+    );
   });
 }
 
-const DEFAULT_EXCLUDED_PATHS = [".git", ".obsidian", ".trash", ".excalidraw", ".mobile"];
+const DEFAULT_EXCLUDED_PATHS = [
+  ".git",
+  ".obsidian",
+  ".trash",
+  ".excalidraw",
+  ".mobile",
+];
 
-function walkFilesHelper(pathToWalk: string, excludedFolders: string[], fileEndings: string[], resultFiles: string[]) {
+function walkFilesHelper(
+  pathToWalk: string,
+  excludedFolders: string[],
+  fileEndings: string[],
+  resultFiles: string[]
+) {
   const files = fs.readdirSync(pathToWalk);
   const { configFileName } = getPreferenceValues();
 
@@ -209,7 +241,11 @@ function getFilePaths(vault: Vault): string[] {
 /** Gets a list of folders that are ignored by the user inside of Obsidian */
 function getUserIgnoreFilters(vault: Vault): string[] {
   const { configFileName } = getPreferenceValues<GlobalPreferences>();
-  const appJSONPath = path.join(vault.path, configFileName || ".obsidian", "app.json");
+  const appJSONPath = path.join(
+    vault.path,
+    configFileName || ".obsidian",
+    "app.json"
+  );
   if (!fs.existsSync(appJSONPath)) {
     return [];
   } else {
@@ -224,7 +260,11 @@ function getUserIgnoreFilters(vault: Vault): string[] {
  */
 function getAttachmentFolderPath(vault: Vault): string {
   const { configFileName } = getPreferenceValues<GlobalPreferences>();
-  const appJSONPath = path.join(vault.path, configFileName || ".obsidian", "app.json");
+  const appJSONPath = path.join(
+    vault.path,
+    configFileName || ".obsidian",
+    "app.json"
+  );
   if (!fs.existsSync(appJSONPath)) {
     return "";
   }
@@ -242,7 +282,10 @@ function getAttachmentFolderPath(vault: Vault): string {
 function isPathWithinVault(filePath: string, vaultPath: string): boolean {
   const resolvedPath = path.resolve(filePath);
   const resolvedVault = path.resolve(vaultPath);
-  return resolvedPath.startsWith(resolvedVault + path.sep) || resolvedPath === resolvedVault;
+  return (
+    resolvedPath.startsWith(resolvedVault + path.sep) ||
+    resolvedPath === resolvedVault
+  );
 }
 
 /**
@@ -252,14 +295,21 @@ function isPathWithinVault(filePath: string, vaultPath: string): boolean {
  * 2. The vault root
  * 3. Recursively through the vault (for images in subfolders)
  */
-function resolveImagePath(imageName: string, vault: Vault, notePath?: string): string | null {
+function resolveImagePath(
+  imageName: string,
+  vault: Vault,
+  notePath?: string
+): string | null {
   // Sanitize the image name to prevent path traversal
-  const sanitizedImageName = imageName.replace(/\.\.[\/\\]/g, "");
+  const sanitizedImageName = imageName.replace(/\.\.[/\\]/g, "");
 
   // If imageName already has a path (contains / or \), try that first
   if (sanitizedImageName.includes("/") || sanitizedImageName.includes("\\")) {
     const directPath = path.join(vault.path, sanitizedImageName);
-    if (fs.existsSync(directPath) && isPathWithinVault(directPath, vault.path)) {
+    if (
+      fs.existsSync(directPath) &&
+      isPathWithinVault(directPath, vault.path)
+    ) {
       return directPath;
     }
   }
@@ -271,12 +321,22 @@ function resolveImagePath(imageName: string, vault: Vault, notePath?: string): s
     if (attachmentFolder === "./" && notePath) {
       const noteDir = path.dirname(notePath);
       const sameFolderPath = path.join(noteDir, sanitizedImageName);
-      if (fs.existsSync(sameFolderPath) && isPathWithinVault(sameFolderPath, vault.path)) {
+      if (
+        fs.existsSync(sameFolderPath) &&
+        isPathWithinVault(sameFolderPath, vault.path)
+      ) {
         return sameFolderPath;
       }
     } else {
-      const attachmentPath = path.join(vault.path, attachmentFolder, sanitizedImageName);
-      if (fs.existsSync(attachmentPath) && isPathWithinVault(attachmentPath, vault.path)) {
+      const attachmentPath = path.join(
+        vault.path,
+        attachmentFolder,
+        sanitizedImageName
+      );
+      if (
+        fs.existsSync(attachmentPath) &&
+        isPathWithinVault(attachmentPath, vault.path)
+      ) {
         return attachmentPath;
       }
     }
@@ -292,7 +352,10 @@ function resolveImagePath(imageName: string, vault: Vault, notePath?: string): s
   if (notePath) {
     const noteDir = path.dirname(notePath);
     const sameFolderPath = path.join(noteDir, sanitizedImageName);
-    if (fs.existsSync(sameFolderPath) && isPathWithinVault(sameFolderPath, vault.path)) {
+    if (
+      fs.existsSync(sameFolderPath) &&
+      isPathWithinVault(sameFolderPath, vault.path)
+    ) {
       return sameFolderPath;
     }
   }
@@ -339,38 +402,54 @@ function resolveImagePath(imageName: string, vault: Vault, notePath?: string): s
  * Raycast's markdown renderer doesn't support local file paths on Windows,
  * so we show a placeholder indicating the image name instead.
  */
-export function convertObsidianImages(content: string, vault: Vault, notePath?: string): string {
+export function convertObsidianImages(
+  content: string,
+  vault: Vault,
+  notePath?: string
+): string {
   // Reset regex state
   OBSIDIAN_IMAGE_EMBED_REGEX.lastIndex = 0;
 
   // Debug: log what we're processing
   const matches = content.match(OBSIDIAN_IMAGE_EMBED_REGEX);
-  console.log(`[convertObsidianImages] Found ${matches?.length || 0} image embeds in content`);
+  console.log(
+    `[convertObsidianImages] Found ${
+      matches?.length || 0
+    } image embeds in content`
+  );
   if (matches) {
     console.log(`[convertObsidianImages] Matches: ${JSON.stringify(matches)}`);
   }
 
-  return content.replace(OBSIDIAN_IMAGE_EMBED_REGEX, (match, imagePath, _ext, altText) => {
-    console.log(`[convertObsidianImages] Processing: ${match}, imagePath: ${imagePath}`);
-    const resolvedPath = resolveImagePath(imagePath, vault, notePath);
-    console.log(`[convertObsidianImages] Resolved path: ${resolvedPath}`);
-    if (resolvedPath) {
-      // Raycast's markdown renderer doesn't support local file paths on Windows
-      // Show a placeholder with the image name instead
-      const displayName = altText || path.basename(imagePath);
-      return `\`📷 ${displayName}\``;
+  return content.replace(
+    OBSIDIAN_IMAGE_EMBED_REGEX,
+    (match, imagePath, _ext, altText) => {
+      console.log(
+        `[convertObsidianImages] Processing: ${match}, imagePath: ${imagePath}`
+      );
+      const resolvedPath = resolveImagePath(imagePath, vault, notePath);
+      console.log(`[convertObsidianImages] Resolved path: ${resolvedPath}`);
+      if (resolvedPath) {
+        // Raycast's markdown renderer doesn't support local file paths on Windows
+        // Show a placeholder with the image name instead
+        const displayName = altText || path.basename(imagePath);
+        return `\`📷 ${displayName}\``;
+      }
+      // If image not found, indicate that
+      console.log(`[convertObsidianImages] Image not found: ${imagePath}`);
+      return `\`📷 ${imagePath} (not found)\``;
     }
-    // If image not found, indicate that
-    console.log(`[convertObsidianImages] Image not found: ${imagePath}`);
-    return `\`📷 ${imagePath} (not found)\``;
-  });
+  );
 }
 
 /**
  * Checks if content is an Excalidraw drawing file
  */
 function isExcalidrawContent(content: string): boolean {
-  return content.includes("excalidraw-plugin:") || content.includes("# Excalidraw Data");
+  return (
+    content.includes("excalidraw-plugin:") ||
+    content.includes("# Excalidraw Data")
+  );
 }
 
 /**
@@ -378,7 +457,9 @@ function isExcalidrawContent(content: string): boolean {
  */
 function getExcalidrawEmbeddedFiles(content: string): string[] {
   const embeddedFiles: string[] = [];
-  const matches = content.matchAll(/\[\[([^\]]+\.(png|jpg|jpeg|gif|webp|svg))\]\]/gi);
+  const matches = content.matchAll(
+    /\[\[([^\]]+\.(png|jpg|jpeg|gif|webp|svg))\]\]/gi
+  );
   for (const match of matches) {
     embeddedFiles.push(match[1]);
   }
@@ -388,9 +469,14 @@ function getExcalidrawEmbeddedFiles(content: string): string[] {
 /**
  * Formats Excalidraw content for display - shows a friendly message and any embedded images
  */
-function formatExcalidrawContent(content: string, vault?: Vault, notePath?: string): string {
+function formatExcalidrawContent(
+  content: string,
+  vault?: Vault,
+  notePath?: string
+): string {
   let result = "# 🎨 Excalidraw Drawing\n\n";
-  result += "*This is an Excalidraw drawing file. Open in Obsidian to view and edit the drawing.*\n\n";
+  result +=
+    "*This is an Excalidraw drawing file. Open in Obsidian to view and edit the drawing.*\n\n";
 
   // Try to extract and display any embedded images
   const embeddedFiles = getExcalidrawEmbeddedFiles(content);
@@ -409,7 +495,11 @@ function formatExcalidrawContent(content: string, vault?: Vault, notePath?: stri
   return result;
 }
 
-export function filterContent(content: string, vault?: Vault, notePath?: string) {
+export function filterContent(
+  content: string,
+  vault?: Vault,
+  notePath?: string
+) {
   const pref: GlobalPreferences = getPreferenceValues();
 
   // Handle Excalidraw files specially
@@ -448,7 +538,11 @@ export function filterContent(content: string, vault?: Vault, notePath?: string)
   return content;
 }
 
-export function getNoteFileContent(notePath: string, filter = false, vault?: Vault) {
+export function getNoteFileContent(
+  notePath: string,
+  filter = false,
+  vault?: Vault
+) {
   let content = "";
   content = fs.readFileSync(notePath, "utf8") as string;
   return filter ? filterContent(content, vault, notePath) : content;
@@ -461,12 +555,12 @@ export function getNoteFileContent(notePath: string, filter = false, vault?: Vau
 function getTagsFromFileHead(filePath: string): string[] {
   try {
     // Read only the first 2KB to extract YAML frontmatter tags
-    const fd = fs.openSync(filePath, 'r');
+    const fd = fs.openSync(filePath, "r");
     const buffer = Buffer.alloc(2048);
     const bytesRead = fs.readSync(fd, buffer, 0, 2048, 0);
     fs.closeSync(fd);
 
-    const head = buffer.toString('utf8', 0, bytesRead);
+    const head = buffer.toString("utf8", 0, bytesRead);
     return tagsForString(head);
   } catch {
     return [];
@@ -492,8 +586,8 @@ export function loadNotes(vault: Vault): Note[] {
       title,
       path: filePath,
       lastModified: fs.statSync(filePath).mtime,
-      tags: getTagsFromFileHead(filePath),  // Lightweight tag extraction
-      content: "",  // Content loaded lazily via getNoteContent()
+      tags: getTagsFromFileHead(filePath), // Lightweight tag extraction
+      content: "", // Content loaded lazily via getNoteContent()
       bookmarked: bookmarkedFilePaths.includes(relativePath),
     };
 
@@ -503,7 +597,9 @@ export function loadNotes(vault: Vault): Note[] {
   const end = performance.now();
   console.log(`Finished loading ${notes.length} notes in ${end - start} ms.`);
 
-  return notes.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
+  return notes.sort(
+    (a, b) => b.lastModified.getTime() - a.lastModified.getTime()
+  );
 }
 
 /**
@@ -511,7 +607,11 @@ export function loadNotes(vault: Vault): Note[] {
  * to ensure content is loaded.
  * Pass vault to enable image attachment resolution for display.
  */
-export function getNoteContent(note: Note, filter = false, vault?: Vault): string {
+export function getNoteContent(
+  note: Note,
+  filter = false,
+  vault?: Vault
+): string {
   if (note.content && !filter) {
     // Return cached content if not filtering
     return note.content;
@@ -540,7 +640,15 @@ function getMediaFilePaths(vault: Vault) {
   const files = walkFilesHelper(
     vault.path,
     excludedFolders,
-    [...AUDIO_FILE_EXTENSIONS, ...VIDEO_FILE_EXTENSIONS, ".jpg", ".png", ".gif", ".mp4", ".pdf"],
+    [
+      ...AUDIO_FILE_EXTENSIONS,
+      ...VIDEO_FILE_EXTENSIONS,
+      ".jpg",
+      ".png",
+      ".gif",
+      ".mp4",
+      ".pdf",
+    ],
     []
   );
   return files;

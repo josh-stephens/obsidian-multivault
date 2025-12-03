@@ -1,5 +1,11 @@
-import { deleteNoteFromCache, updateNoteInCache } from "../api/cache/cache.service";
-import { bookmarkNote, unbookmarkNote } from "../api/vault/notes/bookmarks/bookmarks.service";
+import {
+  deleteNoteFromCache,
+  updateNoteInCache,
+} from "../api/cache/cache.service";
+import {
+  bookmarkNote,
+  unbookmarkNote,
+} from "../api/vault/notes/bookmarks/bookmarks.service";
 import { deleteNote } from "../api/vault/notes/notes.service";
 import { Note } from "../api/vault/notes/notes.types";
 import { getNoteFileContent } from "../api/vault/vault.service";
@@ -65,7 +71,9 @@ export function NoteReducer(notes: Note[], action: NoteReducerAction) {
 
     case NoteReducerActionType.Delete: {
       console.log("REDUCER DELETE");
-      const filteredNotes = notes.filter((note) => note.path !== action.payload.note.path);
+      const filteredNotes = notes.filter(
+        (note) => note.path !== action.payload.note.path
+      );
 
       deleteNote(action.payload.note);
       deleteNoteFromCache(action.payload.vault, action.payload.note);

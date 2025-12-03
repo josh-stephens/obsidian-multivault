@@ -20,7 +20,10 @@ const cache = new Cache({ capacity: BYTES_PER_MEGABYTE * 500 });
  */
 export function cacheNotesFor(vault: Vault) {
   const notes = loadNotes(vault);
-  cache.set(vault.name, JSON.stringify({ lastCached: Date.now(), notes: notes }));
+  cache.set(
+    vault.name,
+    JSON.stringify({ lastCached: Date.now(), notes: notes })
+  );
   return notes;
 }
 
@@ -81,7 +84,10 @@ export function getNotesFromCache(vault: Vault) {
   if (cacheExistForVault(vault)) {
     const data = JSON.parse(cache.get(vault.name) ?? "{}");
     // Cache TTL: 30 minutes (increased from 5 for better performance)
-    if (data.notes?.length > 0 && data.lastCached > Date.now() - 1000 * 60 * 30) {
+    if (
+      data.notes?.length > 0 &&
+      data.lastCached > Date.now() - 1000 * 60 * 30
+    ) {
       const notes_ = data.notes as Note[];
       logger.info("Using cached notes.");
       return notes_;

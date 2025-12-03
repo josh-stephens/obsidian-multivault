@@ -7,14 +7,18 @@ export function vaultPluginCheck(vaults: Vault[], plugin: string) {
 
   const vaultsWithoutPlugin: Vault[] = [];
   const vaultsWithPlugin = vaults.filter((vault: Vault) => {
-    const communityPluginsPath = `${vault.path}/${configFileName || ".obsidian"}/community-plugins.json`;
+    const communityPluginsPath = `${vault.path}/${
+      configFileName || ".obsidian"
+    }/community-plugins.json`;
 
     if (!fs.existsSync(communityPluginsPath)) {
       vaultsWithoutPlugin.push(vault);
       return false;
     }
 
-    const plugins: string[] = JSON.parse(fs.readFileSync(communityPluginsPath, "utf-8"));
+    const plugins: string[] = JSON.parse(
+      fs.readFileSync(communityPluginsPath, "utf-8")
+    );
     const hasPlugin = plugins.includes(plugin);
 
     if (!hasPlugin) {

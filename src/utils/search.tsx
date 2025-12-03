@@ -39,7 +39,11 @@ export function filterNotes(notes: Note[], input: string, byContent: boolean) {
   return titleMatches;
 }
 
-export function filterNotesFuzzy(notes: Note[], input: string, byContent: boolean) {
+export function filterNotesFuzzy(
+  notes: Note[],
+  input: string,
+  byContent: boolean
+) {
   if (input.length === 0) {
     return notes;
   }

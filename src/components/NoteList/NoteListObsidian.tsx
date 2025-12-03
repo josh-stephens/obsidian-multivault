@@ -1,6 +1,10 @@
 import React, { useReducer } from "react";
 
-import { NotesContext, NotesDispatchContext, useNotes } from "../../utils/hooks";
+import {
+  NotesContext,
+  NotesDispatchContext,
+  useNotes,
+} from "../../utils/hooks";
 import { SearchArguments } from "../../utils/interfaces";
 import { NoteList } from "./NoteList";
 import { NoteActions, OpenNoteActions } from "../../utils/actions";
@@ -36,7 +40,11 @@ export function NoteListObsidian(props: {
                 <OpenNoteActions note={note} notes={allNotes} vault={vault} />
                 <NoteActions notes={allNotes} note={note} vault={vault} />
                 <ActionPanel.Section>
-                  <Action title="Reload Notes" icon={Icon.ArrowClockwise} onAction={() => renewCache(vault)} />
+                  <Action
+                    title="Reload Notes"
+                    icon={Icon.ArrowClockwise}
+                    onAction={() => renewCache(vault)}
+                  />
                   {onSwitchVault && (
                     <Action
                       title="Switch Vault"

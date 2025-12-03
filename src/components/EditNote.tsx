@@ -1,4 +1,13 @@
-import { ActionPanel, Form, Action, useNavigation, showToast, Toast, Icon, confirmAlert } from "@raycast/api";
+import {
+  ActionPanel,
+  Form,
+  Action,
+  useNavigation,
+  showToast,
+  Toast,
+  Icon,
+  confirmAlert,
+} from "@raycast/api";
 import fs from "fs";
 import { applyTemplates } from "../api/templating/templating.service";
 import { Note } from "../api/vault/notes/notes.types";
@@ -10,7 +19,11 @@ interface FormValue {
   content: string;
 }
 
-export function EditNote(props: { note: Note; vault: Vault; dispatch: (action: NoteReducerAction) => void }) {
+export function EditNote(props: {
+  note: Note;
+  vault: Vault;
+  dispatch: (action: NoteReducerAction) => void;
+}) {
   const { note, vault } = props;
   const { pop } = useNavigation();
 
@@ -20,13 +33,17 @@ export function EditNote(props: { note: Note; vault: Vault; dispatch: (action: N
 
     const options = {
       title: "Override note",
-      message: 'Are you sure you want to override the note: "' + note.title + '"?',
+      message:
+        'Are you sure you want to override the note: "' + note.title + '"?',
       icon: Icon.ExclamationMark,
     };
     if (await confirmAlert(options)) {
       fs.writeFileSync(note.path, content);
       showToast({ title: "Edited note", style: Toast.Style.Success });
-      props.dispatch({ type: NoteReducerActionType.Update, payload: { note: note, vault: vault } });
+      props.dispatch({
+        type: NoteReducerActionType.Update,
+        payload: { note: note, vault: vault },
+      });
       pop();
     }
   }

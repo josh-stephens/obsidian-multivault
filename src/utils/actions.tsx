@@ -9,7 +9,10 @@ import {
   List,
 } from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import { appendSelectedTextTo, getCodeBlocks } from "../api/vault/notes/notes.service";
+import {
+  appendSelectedTextTo,
+  getCodeBlocks,
+} from "../api/vault/notes/notes.service";
 import { Note } from "../api/vault/notes/notes.types";
 import { vaultPluginCheck } from "../api/vault/plugins/plugins.service";
 import { Vault } from "../api/vault/vault.types";
@@ -68,7 +71,10 @@ export function AppendToNoteAction(props: { note: Note; vault: Vault }) {
   );
 }
 
-export function AppendSelectedTextToNoteAction(props: { note: Note; vault: Vault }) {
+export function AppendSelectedTextToNoteAction(props: {
+  note: Note;
+  vault: Vault;
+}) {
   const { note, vault } = props;
   const dispatch = useNotesDispatchContext();
   return (
@@ -78,7 +84,10 @@ export function AppendSelectedTextToNoteAction(props: { note: Note; vault: Vault
       onAction={async () => {
         const done = await appendSelectedTextTo(note);
         if (done) {
-          dispatch({ type: NoteReducerActionType.Update, payload: { note: note, vault: vault } });
+          dispatch({
+            type: NoteReducerActionType.Update,
+            payload: { note: note, vault: vault },
+          });
         }
       }}
       icon={Icon.Pencil}
@@ -100,18 +109,31 @@ export function CopyNoteAction(props: { note: Note }) {
 export function CopyNoteTitleAction(props: { note: Note }) {
   const { note } = props;
   return (
-    <Action.CopyToClipboard title="Copy Note Title" content={note.title} shortcut={{ modifiers: ["opt"], key: "t" }} />
+    <Action.CopyToClipboard
+      title="Copy Note Title"
+      content={note.title}
+      shortcut={{ modifiers: ["opt"], key: "t" }}
+    />
   );
 }
 
 export function PasteNoteAction(props: { note: Note }) {
   const { note } = props;
-  return <Action.Paste title="Paste Note Content" content={getNoteContent(note, true)} shortcut={{ modifiers: ["opt"], key: "v" }} />;
+  return (
+    <Action.Paste
+      title="Paste Note Content"
+      content={getNoteContent(note, true)}
+      shortcut={{ modifiers: ["opt"], key: "v" }}
+    />
+  );
 }
 
 export function CopyMarkdownLinkAction(props: { note: Note }) {
   const { note } = props;
-  const target = getObsidianTarget({ type: ObsidianTargetType.OpenPath, path: note.path });
+  const target = getObsidianTarget({
+    type: ObsidianTargetType.OpenPath,
+    path: note.path,
+  });
 
   return (
     <Action.CopyToClipboard
@@ -125,7 +147,10 @@ export function CopyMarkdownLinkAction(props: { note: Note }) {
 
 export function CopyObsidianURIAction(props: { note: Note }) {
   const { note } = props;
-  const target = getObsidianTarget({ type: ObsidianTargetType.OpenPath, path: note.path });
+  const target = getObsidianTarget({
+    type: ObsidianTargetType.OpenPath,
+    path: note.path,
+  });
 
   return (
     <Action.CopyToClipboard
@@ -147,11 +172,15 @@ export function DeleteNoteAction(props: { note: Note; vault: Vault }) {
       onAction={async () => {
         const options = {
           title: "Delete Note",
-          message: 'Are you sure you want to delete the note: "' + note.title + '"?',
+          message:
+            'Are you sure you want to delete the note: "' + note.title + '"?',
           icon: Icon.ExclamationMark,
         };
         if (await confirmAlert(options)) {
-          dispatch({ type: NoteReducerActionType.Delete, payload: { note: note, vault: vault } });
+          dispatch({
+            type: NoteReducerActionType.Delete,
+            payload: { note: note, vault: vault },
+          });
         }
       }}
       icon={{ source: Icon.Trash, tintColor: Color.Red }}
@@ -159,18 +188,33 @@ export function DeleteNoteAction(props: { note: Note; vault: Vault }) {
   );
 }
 
-export function QuickLookAction(props: { note: Note; notes: Note[]; vault: Vault }) {
+export function QuickLookAction(props: {
+  note: Note;
+  notes: Note[];
+  vault: Vault;
+}) {
   const { note, notes, vault } = props;
   return (
     <Action.Push
       title="Quick Look"
-      target={<NoteQuickLook note={note} showTitle={true} allNotes={notes} vault={vault} />}
+      target={
+        <NoteQuickLook
+          note={note}
+          showTitle={true}
+          allNotes={notes}
+          vault={vault}
+        />
+      }
       icon={Icon.Eye}
     />
   );
 }
 
-export function OpenInDefaultAppAction(props: { note: Note; notes: Note[]; vault: Vault }) {
+export function OpenInDefaultAppAction(props: {
+  note: Note;
+  notes: Note[];
+  vault: Vault;
+}) {
   const { note } = props;
   const [defaultApp, setDefaultApp] = useState<string>("Default App");
   useEffect(() => {
@@ -183,7 +227,13 @@ export function OpenInDefaultAppAction(props: { note: Note; notes: Note[]; vault
   }, [note.path]);
 
   if (!defaultApp) return null;
-  return <Action.Open title={`Open in ${defaultApp}`} target={note.path} icon={Icon.AppWindow} />;
+  return (
+    <Action.Open
+      title={`Open in ${defaultApp}`}
+      target={note.path}
+      icon={Icon.AppWindow}
+    />
+  );
 }
 
 export function BookmarkNoteAction(props: { note: Note; vault: Vault }) {
@@ -194,7 +244,10 @@ export function BookmarkNoteAction(props: { note: Note; vault: Vault }) {
       title="Bookmark Note"
       shortcut={{ modifiers: ["opt"], key: "p" }}
       onAction={() => {
-        dispatch({ type: NoteReducerActionType.Bookmark, payload: { note: note, vault: vault } });
+        dispatch({
+          type: NoteReducerActionType.Bookmark,
+          payload: { note: note, vault: vault },
+        });
       }}
       icon={Icon.Bookmark}
     />
@@ -209,7 +262,10 @@ export function UnbookmarkNoteAction(props: { note: Note; vault: Vault }) {
       title="Unbookmark Note"
       shortcut={{ modifiers: ["opt"], key: "p" }}
       onAction={() => {
-        dispatch({ type: NoteReducerActionType.Unbookmark, payload: { note: note, vault: vault } });
+        dispatch({
+          type: NoteReducerActionType.Unbookmark,
+          payload: { note: note, vault: vault },
+        });
       }}
       icon={Icon.Bookmark}
     />
@@ -218,11 +274,19 @@ export function UnbookmarkNoteAction(props: { note: Note; vault: Vault }) {
 
 export function OpenPathInObsidianAction(props: { path: string }) {
   const { path } = props;
-  const target = getObsidianTarget({ type: ObsidianTargetType.OpenPath, path: path });
-  return <Action.Open title="Open in Obsidian" target={target} icon={ObsidianIcon} />;
+  const target = getObsidianTarget({
+    type: ObsidianTargetType.OpenPath,
+    path: path,
+  });
+  return (
+    <Action.Open title="Open in Obsidian" target={target} icon={ObsidianIcon} />
+  );
 }
 
-export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: Vault }) {
+export function OpenNoteInObsidianNewPaneAction(props: {
+  note: Note;
+  vault: Vault;
+}) {
   const { note, vault } = props;
 
   return (
@@ -242,13 +306,25 @@ export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: Vaul
 
 export function ShowVaultInFinderAction(props: { vault: Vault }) {
   const { vault } = props;
-  return <Action.ShowInFinder title="Show in Finder" icon={Icon.Finder} path={vault.path} />;
+  return (
+    <Action.ShowInFinder
+      title="Show in Finder"
+      icon={Icon.Finder}
+      path={vault.path}
+    />
+  );
 }
 
-export function ShowMentioningNotesAction(props: { vault: Vault; str: string; notes: Note[] }) {
+export function ShowMentioningNotesAction(props: {
+  vault: Vault;
+  str: string;
+  notes: Note[];
+}) {
   const { vault, str, notes } = props;
   // Note: This requires loading content for all notes to find mentions - can be slow for large vaults
-  const filteredNotes = notes.filter((note: Note) => getNoteContent(note, false).includes(str));
+  const filteredNotes = notes.filter((note: Note) =>
+    getNoteContent(note, false).includes(str)
+  );
   const count = filteredNotes.length;
   if (count > 0) {
     const list = (
@@ -267,7 +343,13 @@ export function ShowMentioningNotesAction(props: { vault: Vault; str: string; no
         }}
       />
     );
-    return <Action.Push title={`Show Mentioning Notes (${count})`} target={list} icon={Icon.Megaphone} />;
+    return (
+      <Action.Push
+        title={`Show Mentioning Notes (${count})`}
+        target={list}
+        icon={Icon.Megaphone}
+      />
+    );
   } else {
     return <React.Fragment></React.Fragment>;
   }
@@ -281,8 +363,16 @@ export function CopyCodeAction(props: { note: Note }) {
     const codeBlock = codeBlocks[0];
     return (
       <React.Fragment>
-        <Action.Paste title="Paste Code" icon={Icon.Code} content={codeBlock.code} />
-        <Action.CopyToClipboard title="Copy Code" icon={Icon.Code} content={codeBlock.code} />
+        <Action.Paste
+          title="Paste Code"
+          icon={Icon.Code}
+          content={codeBlock.code}
+        />
+        <Action.CopyToClipboard
+          title="Copy Code"
+          icon={Icon.Code}
+          content={codeBlock.code}
+        />
       </React.Fragment>
     );
   } else if (codeBlocks.length > 1) {
@@ -295,13 +385,25 @@ export function CopyCodeAction(props: { note: Note }) {
             {codeBlocks?.map((codeBlock) => (
               <List.Item
                 title={codeBlock.code}
-                detail={<List.Item.Detail markdown={"```\n" + codeBlock.code + "```"} />}
+                detail={
+                  <List.Item.Detail
+                    markdown={"```\n" + codeBlock.code + "```"}
+                  />
+                }
                 subtitle={codeBlock.language}
                 key={codeBlock.code}
                 actions={
                   <ActionPanel>
-                    <Action.Paste title="Paste Code" icon={Icon.Code} content={codeBlock.code} />
-                    <Action.CopyToClipboard title="Copy Code" icon={Icon.Code} content={codeBlock.code} />
+                    <Action.Paste
+                      title="Paste Code"
+                      icon={Icon.Code}
+                      content={codeBlock.code}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy Code"
+                      icon={Icon.Code}
+                      content={codeBlock.code}
+                    />
                   </ActionPanel>
                 }
               />
@@ -315,7 +417,11 @@ export function CopyCodeAction(props: { note: Note }) {
   }
 }
 
-export function NoteActions(props: { notes: Note[]; note: Note; vault: Vault }) {
+export function NoteActions(props: {
+  notes: Note[];
+  note: Note;
+  vault: Vault;
+}) {
   const { notes, note, vault } = props;
 
   return (
@@ -342,14 +448,20 @@ export function NoteActions(props: { notes: Note[]; note: Note; vault: Vault }) 
   );
 }
 
-export function OpenNoteActions(props: { note: Note; notes: Note[]; vault: Vault }) {
+export function OpenNoteActions(props: {
+  note: Note;
+  notes: Note[];
+  vault: Vault;
+}) {
   const { note, notes, vault } = props;
   const { primaryAction } = getPreferenceValues<SearchNotePreferences>();
 
   const [vaultsWithPlugin] = vaultPluginCheck([vault], "obsidian-advanced-uri");
 
   const quicklook = <QuickLookAction note={note} notes={notes} vault={vault} />;
-  const openInDefaultApp = <OpenInDefaultAppAction note={note} notes={notes} vault={vault} />;
+  const openInDefaultApp = (
+    <OpenInDefaultAppAction note={note} notes={notes} vault={vault} />
+  );
   const obsidian = <OpenPathInObsidianAction path={note.path} />;
   const obsidianNewPane = vaultsWithPlugin.includes(vault) ? (
     <OpenNoteInObsidianNewPaneAction note={note} vault={vault} />
