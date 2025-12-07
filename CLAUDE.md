@@ -131,3 +131,21 @@ All issues found and fixed on 2025-11-25:
 ## Known Limitations
 
 1. **Local image preview on Windows** - Raycast's markdown renderer doesn't support local file paths; shows `📷 filename` placeholder instead
+
+## GitHub Issues for Project Tracking
+
+Use GitHub issues for persistent state across Claude sessions:
+
+- **Repository**: https://github.com/josh-stephens/obsidian-multivault/issues
+- **Labels**: `enhancement`, `bug`, `performance`, `security`, `react`, `reliability`, `completed`
+
+```bash
+# Create issue
+gh issue create -R josh-stephens/obsidian-multivault --title "Title" --body "Description" --label "label1,label2"
+
+# Close with comment
+gh issue close NUM -R josh-stephens/obsidian-multivault -c "Completed in commit abc123"
+
+# List issues
+gh issue list -R josh-stephens/obsidian-multivault
+```
