@@ -1,5 +1,5 @@
 import { List, ActionPanel } from "@raycast/api";
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import fs from "fs";
 
 import {
@@ -27,9 +27,13 @@ export function NoteListItem(props: {
 
   const noteHasBeenMoved = !fs.existsSync(note.path);
 
-  if (noteHasBeenMoved) {
-    renewCache(vault);
-  }
+  // Renew cache asynchronously when note has been moved/deleted
+  useEffect(() => {
+    if (noteHasBeenMoved) {
+      const timer = setTimeout(() => renewCache(vault), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [noteHasBeenMoved, vault]);
 
   // Load content on demand only when detail view is shown
   const content = useMemo(() => {

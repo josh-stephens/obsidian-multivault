@@ -77,7 +77,7 @@ export function useMedia(vault: Vault) {
       }
     }
     fetch();
-  }, []);
+  }, [vault.path]); // Re-run when vault changes
 
   return media;
 }

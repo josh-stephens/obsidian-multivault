@@ -17,9 +17,12 @@ import {
   SearchNotePreferences,
 } from "../../utils/preferences";
 import { tagsForString } from "../../utils/yaml";
+import { Logger } from "../logger/logger.service";
 import { getBookmarkedNotePaths } from "./notes/bookmarks/bookmarks.service";
 import { Note } from "./notes/notes.types";
 import { ObsidianJSON, Vault } from "./vault.types";
+
+const logger = new Logger("VaultService");
 
 function getVaultNameFromPath(vaultPath: string): string {
   const name = path.basename(vaultPath);
@@ -96,13 +99,7 @@ export function parseVaults(): Vault[] {
   return paths
     .map(cleanVaultPath)
     .filter((vaultPath) => vaultPath !== "")
-    .filter((vaultPath) => {
-      const exists = fs.existsSync(vaultPath);
-      if (!exists) {
-        console.log(`Vault path does not exist: ${vaultPath}`);
-      }
-      return exists;
-    })
+    .filter((vaultPath) => fs.existsSync(vaultPath))
     .map((vaultPath) => ({
       name: getVaultNameFromPath(vaultPath),
       key: vaultPath,
@@ -151,7 +148,7 @@ export async function loadObsidianJson(): Promise<Vault[]> {
       path: vaultPath,
     }));
   } catch (e) {
-    console.log(`Could not load obsidian.json from ${obsidianJsonPath}: ${e}`);
+    logger.warning(`Could not load obsidian.json from ${obsidianJsonPath}: ${e}`);
     return [];
   }
 }
@@ -410,25 +407,10 @@ export function convertObsidianImages(
   // Reset regex state
   OBSIDIAN_IMAGE_EMBED_REGEX.lastIndex = 0;
 
-  // Debug: log what we're processing
-  const matches = content.match(OBSIDIAN_IMAGE_EMBED_REGEX);
-  console.log(
-    `[convertObsidianImages] Found ${
-      matches?.length || 0
-    } image embeds in content`
-  );
-  if (matches) {
-    console.log(`[convertObsidianImages] Matches: ${JSON.stringify(matches)}`);
-  }
-
   return content.replace(
     OBSIDIAN_IMAGE_EMBED_REGEX,
     (match, imagePath, _ext, altText) => {
-      console.log(
-        `[convertObsidianImages] Processing: ${match}, imagePath: ${imagePath}`
-      );
       const resolvedPath = resolveImagePath(imagePath, vault, notePath);
-      console.log(`[convertObsidianImages] Resolved path: ${resolvedPath}`);
       if (resolvedPath) {
         // Raycast's markdown renderer doesn't support local file paths on Windows
         // Show a placeholder with the image name instead
@@ -436,7 +418,6 @@ export function convertObsidianImages(
         return `\`📷 ${displayName}\``;
       }
       // If image not found, indicate that
-      console.log(`[convertObsidianImages] Image not found: ${imagePath}`);
       return `\`📷 ${imagePath} (not found)\``;
     }
   );
@@ -569,7 +550,7 @@ function getTagsFromFileHead(filePath: string): string[] {
 
 /** Reads a list of notes from the vault path (metadata only - content loaded on demand) */
 export function loadNotes(vault: Vault): Note[] {
-  console.log("Loading Notes for vault: " + vault.path);
+  logger.info("Loading Notes for vault: " + vault.path);
   const start = performance.now();
 
   const notes: Note[] = [];
@@ -595,7 +576,7 @@ export function loadNotes(vault: Vault): Note[] {
   }
 
   const end = performance.now();
-  console.log(`Finished loading ${notes.length} notes in ${end - start} ms.`);
+  logger.info(`Finished loading ${notes.length} notes in ${end - start} ms.`);
 
   return notes.sort(
     (a, b) => b.lastModified.getTime() - a.lastModified.getTime()

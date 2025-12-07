@@ -3,6 +3,9 @@ import Fuse from "fuse.js";
 import { Note } from "../api/vault/notes/notes.types";
 import { getNoteContent } from "../api/vault/vault.service";
 
+// Cache for content during search to avoid redundant file reads
+const contentCache = new Map<string, string>();
+
 /**
  * Filters a list of notes according to the input search string. If the search string is empty, all notes are returned. It will match the notes title, path and content.
  *
@@ -28,15 +31,25 @@ export function filterNotes(notes: Note[], input: string, byContent: boolean) {
   // Only search content if enabled AND title search found few results
   if (byContent && titleMatches.length < 20) {
     const titleMatchPaths = new Set(titleMatches.map((n) => n.path));
-    const contentMatches = notes.filter(
-      (note) =>
-        !titleMatchPaths.has(note.path) &&
-        getNoteContent(note, false).toLowerCase().includes(input)
-    );
+    const contentMatches = notes.filter((note) => {
+      if (titleMatchPaths.has(note.path)) return false;
+      // Use cached content or load and cache
+      let content = contentCache.get(note.path);
+      if (!content) {
+        content = getNoteContent(note, false).toLowerCase();
+        contentCache.set(note.path, content);
+      }
+      return content.includes(input);
+    });
     return [...titleMatches, ...contentMatches];
   }
 
   return titleMatches;
+}
+
+/** Clear the content cache (call when notes change) */
+export function clearContentCache() {
+  contentCache.clear();
 }
 
 export function filterNotesFuzzy(
@@ -73,8 +86,13 @@ export function filterNotesFuzzy(
     const titleMatchPaths = new Set(filteredNotes.map((n) => n.path));
     const remainingNotes = notes.filter((n) => !titleMatchPaths.has(n.path));
     const contentMatches = remainingNotes.filter((note) => {
-      const content = getNoteContent(note, false).toLowerCase();
-      return words.every((word) => content.includes(word.toLowerCase()));
+      // Use cached content or load and cache
+      let content = contentCache.get(note.path);
+      if (!content) {
+        content = getNoteContent(note, false).toLowerCase();
+        contentCache.set(note.path, content);
+      }
+      return words.every((word) => content!.includes(word.toLowerCase()));
     });
     return [...filteredNotes, ...contentMatches];
   }

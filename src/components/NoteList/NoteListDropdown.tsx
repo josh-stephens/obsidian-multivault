@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNotesContext, useNotesDispatchContext } from "../../utils/hooks";
 import { SearchArguments } from "../../utils/interfaces";
 import { NoteReducerActionType } from "../../utils/reducers";
@@ -11,6 +11,7 @@ export function NoteListDropdown(props: {
   const allNotes = useNotesContext();
   const dispatch = useNotesDispatchContext();
   const { tags, searchArguments } = props;
+  const prevNotesRef = useRef(allNotes);
 
   const [selectedTag, setSelectedTag] = useState<string>(() => {
     if (searchArguments.tagArgument) {
@@ -23,8 +24,14 @@ export function NoteListDropdown(props: {
     return "all";
   });
 
-  // Apply the filter whenever selectedTag changes or allNotes changes
+  // Only re-filter when tag changes (not when allNotes changes from filtering)
   useEffect(() => {
+    // Skip if allNotes reference is the same (no actual change)
+    if (allNotes === prevNotesRef.current && selectedTag === "all") {
+      return;
+    }
+    prevNotesRef.current = allNotes;
+
     if (allNotes) {
       if (selectedTag !== "all") {
         dispatch({
@@ -37,13 +44,13 @@ export function NoteListDropdown(props: {
     }
   }, [selectedTag, allNotes, dispatch]);
 
-  function handleChange(tag: string) {
+  const handleChange = useCallback((tag: string) => {
     setSelectedTag(tag);
-  }
+  }, []);
 
   return (
     <List.Dropdown
-      tooltip="Search For"
+      tooltip="Filter notes by tag"
       value={selectedTag}
       onChange={handleChange}
     >

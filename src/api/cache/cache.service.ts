@@ -33,7 +33,7 @@ export function cacheNotesFor(vault: Vault) {
  * @param vault - Vault to renew the cache for
  */
 export function renewCache(vault: Vault) {
-  console.log("Renew Cache");
+  logger.info("Renewing cache for vault: " + vault.name);
   cacheNotesFor(vault);
 }
 
@@ -44,11 +44,7 @@ export function renewCache(vault: Vault) {
  * @returns true if cache exists for vault
  */
 export function cacheExistForVault(vault: Vault) {
-  if (cache.has(vault.name)) {
-    return true;
-  } else {
-    console.log("Cache does not exist for vault: " + vault.name);
-  }
+  return cache.has(vault.name);
 }
 
 /**
@@ -60,9 +56,16 @@ export function cacheExistForVault(vault: Vault) {
 
 export function updateNoteInCache(vault: Vault, note: Note) {
   if (cacheExistForVault(vault)) {
-    const data = JSON.parse(cache.get(vault.name) ?? "{}");
-    data.notes = data.notes.map((n: Note) => (n.path === note.path ? note : n));
-    cache.set(vault.name, JSON.stringify(data));
+    try {
+      const data = JSON.parse(cache.get(vault.name) ?? "{}");
+      data.notes = data.notes.map((n: Note) =>
+        n.path === note.path ? note : n
+      );
+      cache.set(vault.name, JSON.stringify(data));
+    } catch (error) {
+      logger.warning(`Cache corrupted for vault ${vault.name}, clearing cache`);
+      cache.remove(vault.name);
+    }
   }
 }
 
@@ -74,23 +77,33 @@ export function updateNoteInCache(vault: Vault, note: Note) {
  */
 export function deleteNoteFromCache(vault: Vault, note: Note) {
   if (cacheExistForVault(vault)) {
-    const data = JSON.parse(cache.get(vault.name) ?? "{}");
-    data.notes = data.notes.filter((n: Note) => n.path !== note.path);
-    cache.set(vault.name, JSON.stringify(data));
+    try {
+      const data = JSON.parse(cache.get(vault.name) ?? "{}");
+      data.notes = data.notes.filter((n: Note) => n.path !== note.path);
+      cache.set(vault.name, JSON.stringify(data));
+    } catch (error) {
+      logger.warning(`Cache corrupted for vault ${vault.name}, clearing cache`);
+      cache.remove(vault.name);
+    }
   }
 }
 
 export function getNotesFromCache(vault: Vault) {
   if (cacheExistForVault(vault)) {
-    const data = JSON.parse(cache.get(vault.name) ?? "{}");
-    // Cache TTL: 30 minutes (increased from 5 for better performance)
-    if (
-      data.notes?.length > 0 &&
-      data.lastCached > Date.now() - 1000 * 60 * 30
-    ) {
-      const notes_ = data.notes as Note[];
-      logger.info("Using cached notes.");
-      return notes_;
+    try {
+      const data = JSON.parse(cache.get(vault.name) ?? "{}");
+      // Cache TTL: 30 minutes (increased from 5 for better performance)
+      if (
+        data.notes?.length > 0 &&
+        data.lastCached > Date.now() - 1000 * 60 * 30
+      ) {
+        const notes_ = data.notes as Note[];
+        logger.info("Using cached notes.");
+        return notes_;
+      }
+    } catch (error) {
+      logger.warning(`Cache corrupted for vault ${vault.name}, rebuilding cache`);
+      cache.remove(vault.name);
     }
   }
   return cacheNotesFor(vault);
