@@ -1,6 +1,6 @@
 # Obsidian Multi-vault Changelog
 
-## [Multi-vault Fork] - 2025-12-03
+## [Multi-vault Fork] - {PR_MERGE_DATE}
 
 This is a fork of the original [obsidian-raycast](https://github.com/marcjulianschwarz/obsidian-raycast) extension with substantial new features.
 
